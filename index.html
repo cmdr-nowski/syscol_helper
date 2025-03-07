@@ -1,0 +1,956 @@
+<html><head>
+
+<style>
+
+body {
+  background-color: #041224;
+  color: #68dcec;
+  font-family: Verdana;
+  font-weight: 600;
+}
+
+td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #2ac0a8;
+}
+
+th {
+  padding: 8px;
+  text-align: center;
+  border: 2px solid #2ac0a8;
+}
+
+p {
+  text-align: center;
+}
+
+ul, li {
+  text-align: center;
+  background-color: #182440;
+}
+
+table {
+  width: 100%;
+  text-align: center;
+  border: 1px solid #2ac0a8;
+  border-collapse: collapse;
+}
+
+.center {
+  margin: auto;
+  width: 95%;
+}
+
+.points {
+  margin: auto;
+  width: 40%;
+}
+
+</style>
+
+<!-- <script src="system_assets_data.js"></script> -->
+
+</head>
+
+<body>
+<p>system stats</p>
+<div id="statusContainer" class="center"></div>
+<p>construction points</p>
+<div id="pointsContainer" class="points"></div>
+<p>assets built</p><hr />
+<div id="assetsContainer" class="center"></div>
+<hr />
+<p>available assets</p>
+<div id="filtersContainer" class="center"></div>
+
+<div id="tableContainer" class="center"></div>
+
+<script>
+
+const headers = ["asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy (initial)", "economy (influence)", ""];
+
+const assets = {
+   "coriolis": {
+      name: "coriolis",
+      type: "Starport (tier 2)",
+      variants: ["0 truss","2 truss","4 truss"],
+      cost: {tier: 2, amount: 3},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: -2,wealth: 2,tech: 1,sol: 3,dev: 2 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "asteroid": {
+      name: "asteroid",
+      type: "Starport (tier 2)",
+      variants: ["rock","ice"],
+      cost: {tier: 2, amount: 3},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: -1,wealth: 5,tech: 3,sol: -4,dev: 7 },
+      economy: { initial: "extraction", influence: "-"}
+   },
+   "ocellus": {
+      name: "ocellus",
+      type: "Starport (tier 3)",
+      variants: ["ocellus"],
+      cost: {tier: 3, amount: 6},
+      gain: {tier: "-", amount: "-"},
+      effect: { pop: 5,mpop: 1,sec: -3,wealth: 7,tech: 6,sol: 5,dev: 8 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "orbis": {
+      name: "orbis",
+      type: "Starport (tier 3)",
+      variants: ["apollo","artemis"],
+      cost: {tier: 3, amount: 6},
+      gain: {tier: "-", amount: "-"},
+      effect: { pop: 5,mpop: 1,sec: -3,wealth: 7,tech: 6,sol: 5,dev: 8 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "commercial": {
+      name: "commercial",
+      type: "Orbital Outpost",
+      variants: ["plutus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 5,dev: 0 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "industrial": {
+      name: "industrial",
+      type: "Orbital Outpost",
+      variants: ["vulcan"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 3,sol: 0,dev: 2 },
+      economy: { initial: "industrial", influence: "-"}
+   },
+   "pirate": {
+      name: "pirate",
+      type: "Orbital Outpost",
+      variants: ["dysnomia"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -2,wealth: 2,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "civilian": {
+      name: "civilian",
+      type: "Orbital Outpost",
+      variants: ["vesta"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 1,tech: 0,sol: 1,dev: 2 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "scientific": {
+      name: "scientific",
+      type: "Orbital Outpost",
+      variants: ["prometheus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: 0,wealth: 0,tech: 3,sol: 0,dev: 0 },
+      economy: { initial: "hightech", influence: "-"}
+   },
+   "military": {
+      name: "military",
+      type: "Orbital Outpost",
+      variants: ["nemesis"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: 2,wealth: 0,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "military", influence: "-"}
+   },
+   "Satellite": {
+      name: "Satellite",
+      type: "Installation (tier 1)",
+      variants: ["hermese","angelia","eirene"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 1,tech: 0,sol: 1,dev: 1 },
+      economy: { initial: "-", influence: "-"}
+   },
+   "Communication": {
+      name: "Communication",
+      type: "Installation (tier 1)",
+      variants: ["pistis","soter","aletheia"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 1,wealth: 0,tech: 3,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "-"}
+   },
+   "Agricultural": {
+      name: "Agricultural",
+      type: "Installation (tier 1)",
+      variants: ["demeter"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 5,dev: 1 },
+      economy: { initial: "-", influence: "agricultural"}
+   },
+   "Pirate Base": {
+      name: "Pirate Base",
+      type: "Installation (tier 1)",
+      variants: ["apate","laverna"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -4,wealth: 3,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "contraband"}
+   },
+   "Mining/Industrial": {
+      name: "Mining/Industrial",
+      type: "Installation (tier 1)",
+      variants: ["euthenia","phorcys"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 3,tech: 0,sol: -2,dev: 0 },
+      economy: { initial: "-", influence: "extraction"}
+   },
+   "Relay": {
+      name: "Relay",
+      type: "Installation (tier 1)",
+      variants: ["enodia","ichnaea"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 1,wealth: 0,tech: 0,sol: 0,dev: 1 },
+      economy: { initial: "-", influence: "hightech"}
+   },
+   "Military": {
+      name: "Military",
+      type: "Installation (tier 2)",
+      variants: ["vacuna","alastor"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 6,wealth: 0,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "military"}
+   },
+   "Security": {
+      name: "Security",
+      type: "Installation (tier 2)",
+      variants: ["dicaeosyne","poena","eunomia","nomos"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 8,wealth: 0,tech: 0,sol: 3,dev: 2 },
+      economy: { initial: "-", influence: "military"}
+   },
+   "Government": {
+      name: "Government",
+      type: "Installation (tier 2)",
+      variants: ["harmonia"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 2,wealth: 0,tech: 0,sol: 6,dev: 2 },
+      economy: { initial: "-", influence: "-"}
+   },
+   "Medical": {
+      name: "Medical",
+      type: "Installation (tier 2)",
+      variants: ["asclepius","eupraxia"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 3,sol: 5,dev: 0 },
+      economy: { initial: "-", influence: "hightech"}
+   },
+   "Research": {
+      name: "Research",
+      type: "Installation (tier 2)",
+      variants: ["astraeus","coeus","dodona","dione"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 8,sol: 0,dev: 2 },
+      economy: { initial: "-", influence: "hightech"}
+   },
+   "Tourist": {
+      name: "Tourist",
+      type: "Installation (tier 2)",
+      variants: ["hedone","opora","pasithea"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 6,tech: 0,sol: 0,dev: 2 },
+      economy: { initial: "-", influence: "tourism"}
+   },
+   "Bar": {
+      name: "Bar",
+      type: "Installation (tier 2)",
+      variants: ["dionysus","bachus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -2,wealth: 2,tech: 0,sol: 3,dev: 0 },
+      economy: { initial: "-", influence: "tourism"}
+   },
+   "Civilian Outpost": {
+      name: "Civilian Outpost",
+      type: "Planetary outpost (tier 1)",
+      variants: ["hestia","decima","atropos","nona","lachesis","clotho"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 2,mpop: 0,sec: -2,wealth: 0,tech: 0,sol: 3,dev: 0 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "Industrial Outpost": {
+      name: "Industrial Outpost",
+      type: "Planetary outpost (tier 1)",
+      variants: ["hephaestus","opis","ponos","tethys","bia","mefitis"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "industrial", influence: "-"}
+   },
+   "Scientific Outpost": {
+      name: "Scientific Outpost",
+      type: "Planetary outpost (tier 1)",
+      variants: ["necessitas","ananke","fauna","providentia","antevorta","porrima"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 1,mpop: 0,sec: -1,wealth: 0,tech: 5,sol: 0,dev: 1 },
+      economy: { initial: "hightech", influence: "-"}
+   },
+   "Port": {
+      name: "Port",
+      type: "Planetary port (tier 3)",
+      variants: ["zeus","hera","poseidon","aphrodite"],
+      cost: {tier: 3, amount: 6},
+      gain: {tier: "-", amount: "-"},
+      effect: { pop: 10,mpop: 10,sec: -3,wealth: 5,tech: 5,sol: 5,dev: 10 },
+      economy: { initial: "colony", influence: "-"}
+   },
+   "Small Agriculture": {
+      name: "Small Agriculture",
+      type: "Odyssey Settlement",
+      variants: ["consus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 3,dev: 0 },
+      economy: { initial: "agriculture", influence: "-"}
+   },
+   "Medium Agriculture": {
+      name: "Medium Agriculture",
+      type: "Odyssey Settlement",
+      variants: ["picumnus","annona"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 6,dev: 0 },
+      economy: { initial: "agriculture", influence: "-"}
+   },
+   "Large Agriculture": {
+      name: "Large Agriculture",
+      type: "Odyssey Settlement",
+      variants: ["ceres","fornax"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 2},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 10,dev: 0 },
+      economy: { initial: "agriculture", influence: "-"}
+   },
+   "Small Mining": {
+      name: "Small Mining",
+      type: "Odyssey Settlement",
+      variants: ["ourea"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 2,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "extraction", influence: "-"}
+   },
+   "Medium Mining": {
+      name: "Medium Mining",
+      type: "Odyssey Settlement",
+      variants: ["mantus","orcus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 5,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "extraction", influence: "-"}
+   },
+   "Large Mining": {
+      name: "Large Mining",
+      type: "Odyssey Settlement",
+      variants: ["erebus","aerecura"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 2},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 7,tech: 1,sol: -2,dev: 0 },
+      economy: { initial: "extraction", influence: "-"}
+   },
+   "Small Industrial": {
+      name: "Small Industrial",
+      type: "Odyssey Settlement",
+      variants: ["fontus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 0,dev: 2 },
+      economy: { initial: "industrial", influence: "-"}
+   },
+   "Medium Industrial": {
+      name: "Medium Industrial",
+      type: "Odyssey Settlement",
+      variants: ["metope","palici","minthe"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 0,dev: 5 },
+      economy: { initial: "industrial", influence: "-"}
+   },
+   "Large Industrial": {
+      name: "Large Industrial",
+      type: "Odyssey Settlement",
+      variants: ["gaea"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 2},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 2,tech: 0,sol: 0,dev: 8 },
+      economy: { initial: "industrial", influence: "-"}
+   },
+   "Small Military": {
+      name: "Small Military",
+      type: "Odyssey Settlement",
+      variants: ["ioke"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 2,wealth: 0,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "military", influence: "-"}
+   },
+   "Medium Military": {
+      name: "Medium Military",
+      type: "Odyssey Settlement",
+      variants: ["bellona","enyo","polemos"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 5,wealth: 0,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "military", influence: "-"}
+   },
+   "Large Military": {
+      name: "Large Military",
+      type: "Odyssey Settlement",
+      variants: ["minerva"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 2},
+      effect: { pop: 0,mpop: 0,sec: 6,wealth: 0,tech: 0,sol: 0,dev: 2 },
+      economy: { initial: "military", influence: "-"}
+   },
+   "Small Bio": {
+      name: "Small Bio",
+      type: "Odyssey Settlement",
+      variants: ["pheobe"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 3,sol: 0,dev: 1 },
+      economy: { initial: "hightech", influence: "-"}
+   },
+   "Medium Bio": {
+      name: "Medium Bio",
+      type: "Odyssey Settlement",
+      variants: ["asteria","caerus"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 6,sol: 0,dev: 1 },
+      economy: { initial: "hightech", influence: "-"}
+   },
+   "Large Bio": {
+      name: "Large Bio",
+      type: "Odyssey Settlement",
+      variants: ["chronos"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 10,sol: 0,dev: 2 },
+      economy: { initial: "hightech", influence: "-"}
+   },
+   "Small Tourist": {
+      name: "Small Tourist",
+      type: "Odyssey Settlement",
+      variants: ["aergia"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 1,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "tourism", influence: "-"}
+   },
+   "Medium Tourist": {
+      name: "Medium Tourist",
+      type: "Odyssey Settlement",
+      variants: ["comus","gelos"],
+      cost: {tier: "-", amount: "-"},
+      gain: {tier: 2, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "tourism", influence: "-"}
+   },
+   "Large Tourist": {
+      name: "Large Tourist",
+      type: "Odyssey Settlement",
+      variants: ["fufluns"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 2},
+      effect: { pop: 0,mpop: 0,sec: -2,wealth: 5,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "tourism", influence: "-"}
+   },
+   "Extraction Hub": {
+      name: "Extraction Hub",
+      type: "Horizons settlement",
+      variants: ["tartarus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 10,tech: 0,sol: -4,dev: 2 },
+      economy: { initial: "-", influence: "extraction"}
+   },
+   "Civilian Hub": {
+      name: "Civilian Hub",
+      type: "Horizons settlement",
+      variants: ["aegle"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -3,wealth: 0,tech: 0,sol: 3,dev: 2 },
+      economy: { initial: "-", influence: "-"}
+   },
+   "Exploration Hub": {
+      name: "Exploration Hub",
+      type: "Horizons settlement",
+      variants: ["tellus_e"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 0,tech: 6,sol: 0,dev: 2 },
+      economy: { initial: "-", influence: "tourism"}
+   },
+   "Outpost Hub": {
+      name: "Outpost Hub",
+      type: "Horizons settlement",
+      variants: ["io"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -2,wealth: 0,tech: 0,sol: 3,dev: 2 },
+      economy: { initial: "-", influence: "-"}
+   },
+   "Scientific Hub": {
+      name: "Scientific Hub",
+      type: "Horizons settlement",
+      variants: ["athena","caelus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 10,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "hightech"}
+   },
+   "Military Hub": {
+      name: "Military Hub",
+      type: "Horizons settlement",
+      variants: ["alala","ares"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 10,wealth: 0,tech: 0,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "military"}
+   },
+   "Refinery Hub": {
+      name: "Refinery Hub",
+      type: "Horizons settlement",
+      variants: ["silenus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -1,wealth: 5,tech: 3,sol: -2,dev: 7 },
+      economy: { initial: "-", influence: "refinery"}
+   },
+   "High Tech Hub": {
+      name: "High Tech Hub",
+      type: "Horizons settlement",
+      variants: ["janus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: -2,wealth: 2,tech: 10,sol: 0,dev: 0 },
+      economy: { initial: "-", influence: "hightech"}
+   },
+   "Industrial Hub": {
+      name: "Industrial Hub",
+      type: "Horizons settlement",
+      variants: ["molae","tellus_i","eunostus"],
+      cost: {tier: 2, amount: 1},
+      gain: {tier: 3, amount: 1},
+      effect: { pop: 0,mpop: 0,sec: 0,wealth: 5,tech: 3,sol: -4,dev: 2 },
+      economy: { initial: "-", influence: "industrial"}
+   }
+};
+
+var assetFilters = {
+    "can build": false,
+    space: false,
+    ground: false,
+    "tier 1": false,
+    "tier 2": false,
+    "tier 3": false,
+    pop: false,
+    mpop: false,
+    sec: false,
+    wealth: false,
+    tech: false,
+    sol: false,
+    dev: false
+};
+
+var points = { t2: 0, t3: 0 };
+var systemAssets = {};
+var systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
+
+var assetRequirements = {
+    aergia: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
+    comus: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
+    gelos: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
+    fufluns: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
+    aegle: { req: ["consus", "picumnus", "annona", "ceres", "fornax"], reqText: 'an agricultural settlement' },
+    tellus_e: { req: ["pistis", "soter", "aletheia"], reqText: 'a communications installation' },
+    io: { req: ["demeter"], reqText: 'a space farm' },
+    alala: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
+    ares: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
+    molae: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
+    tellus_i: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
+    eunostus: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
+    dicaeosyne: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
+    poena: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
+    eunomia: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
+    nomos: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
+    astraeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    coeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    dodona: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    dione: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    hedone: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'},
+    opora: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'},
+    pasithea: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'}
+}
+
+const spaceTypes = [
+    'Starport (tier 2)',
+    'Starport (tier 3)',
+    'Orbital Outpost',
+    'Installation (tier 1)',
+    'Installation (tier 2)'
+];
+
+const primaryTypes = [
+    'Starport (tier 2)',
+    'Starport (tier 3)',
+    'Orbital Outpost'
+];
+
+const groundTypes = [
+    'Planetary outpost (tier 2)',
+    'Planetary port (tier 3)',
+    'Odyssey Settlement',
+    'Horizons settlement'
+];
+
+const filterGroups = [
+    ['space', 'ground'],
+    ['tier 1', 'tier 2', 'tier 3']
+];
+
+function numSystemAssets() {
+    return Object.keys(systemAssets).length;
+}
+
+function idToVariant(id) {
+    var parts = id.split('|');
+    return parts[1];
+}
+
+function haveRequirementFor(id) {
+    var variantName = idToVariant(id);
+    if (variantName in assetRequirements) {
+        for (var builtId in systemAssets) {
+            var builtVariant = idToVariant(builtId);
+            if (assetRequirements[variantName].req.includes(builtVariant)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
+function addSystemAsset(asset, id) {
+
+    if (!haveRequirementFor(id)) {
+        var variantName = idToVariant(id);  
+        alert("you must first build: " + assetRequirements[variantName].reqText);
+        return;
+    }
+
+    if (asset.gain.amount > 0) {
+        var gainTier = 't' + asset.gain.tier;
+        points[gainTier] += asset.gain.amount;
+    }
+    
+    if (numSystemAssets() > 0) {
+        if (asset.cost.amount > 0) {
+            var costTier = 't' + asset.cost.tier;
+            points[costTier] -= asset.cost.amount;
+        }
+    }
+
+    if (id in systemAssets) {
+        systemAssets[id]++;
+    } else {
+        systemAssets[id] = 1;
+    }
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        systemStatus[headers[i]] += asset.effect[headers[i]];
+    }
+
+    refresh();
+}
+
+function textHeader(str) {
+
+    var c = document.createElement('th');
+    c.appendChild(document.createTextNode(str));
+    return c;
+}
+
+function textCell(str) {
+
+    var c = document.createElement('td');
+    c.appendChild(document.createTextNode(str));
+    return c;
+}
+
+function effectCell(asset, str) {
+
+    var val = asset.effect[str];
+    val = val > 0 ? '+' + val : val == 0 ? '-' : val;
+    return textCell(val);
+}
+
+function assetHeaders() {
+    var r = document.createElement('tr');
+    headers.forEach( function (str)  {
+        r.appendChild(textHeader(str));
+    });
+    return r;
+}
+
+function canAdd(asset) {
+    if (!numSystemAssets()) {
+        if (primaryTypes.includes(asset.type)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    if (asset.cost.amount > 0) {
+        var tier = 't' + asset.cost.tier;
+        if (points[tier] < asset.cost.amount) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function actions(asset, variant) {
+
+    var id = asset.name + '|' + variant;
+    var addrem = document.createElement('table');
+    var addremRow = document.createElement('tr');
+
+    var addCell;
+
+    if (canAdd(asset)) {
+        addCell = textCell('+');
+        addCell.style.backgroundColor = '#208040';
+        addCell.onclick = function() { addSystemAsset(asset, id); };
+    } else {
+        addCell = textCell(' ');
+        addCell.style.backgroundColor = '#808080';
+    }
+    addCell.style.padding = '0px';
+
+    addremRow.appendChild(addCell);
+    addrem.appendChild(addremRow);
+    addremCell = document.createElement('td');
+    addremCell.appendChild(addrem);
+    return addremCell;
+}
+
+function assetRow(assetName, variant) {
+
+    var asset = assets[assetName];
+    var r = document.createElement('tr');
+    var name = asset.name + ' (' + variant + ')';
+    r.appendChild(textCell(name));
+    r.appendChild(textCell(asset.type));
+    var costStr = '-';
+    if (asset.cost.amount > 0) {
+        costStr = asset.cost.amount + "xT" + asset.cost.tier;
+    }
+    var gainStr = '-';
+    if (asset.gain.amount > 0) {
+        gainStr = asset.gain.amount + "xT" + asset.gain.tier;
+    }
+
+    r.appendChild(textCell(costStr));
+    r.appendChild(textCell(gainStr));
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        r.appendChild(effectCell(asset, headers[i]));
+    }
+    r.appendChild(textCell(asset.economy.initial));
+    r.appendChild(textCell(asset.economy.influence));
+    r.appendChild(actions(asset, variant));
+    return r;
+}
+
+function isVisible(assetName) {
+
+    var asset = assets[assetName];
+
+    if (assetFilters["can build"]) {
+        if (!canAdd(asset)) {
+            return false;
+        }
+    }
+    if (assetFilters["space"]) {
+        if (!(spaceTypes.includes(asset.type))) {
+            return false;
+        }
+    }
+    if (assetFilters["ground"]) {
+        if (!(groundTypes.includes(asset.type))) {
+            return false;
+        }
+    }
+    if (assetFilters["tier 1"]) {
+        if (asset.cost.amount > 0) {
+            return false;
+        }
+    }
+    if (assetFilters["tier 2"]) {
+        if (asset.cost.tier != 2) {
+            return false;
+        }
+    }
+    if (assetFilters["tier 3"]) {
+        if (asset.cost.tier != 3) {
+            return false;
+        }
+    }
+    for (var stat in systemStatus) {
+        if (assetFilters[stat]) {
+            if (asset.effect[stat] < 1) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+function assetTable() {
+    var t = document.createElement('table');
+    var r = assetHeaders();
+    t.appendChild(r);
+    for (assetName in assets) {
+        if (isVisible(assetName)) {
+            assets[assetName].variants.forEach(function (variant) {
+                t.appendChild(assetRow(assetName, variant));
+            });
+        }
+    }
+    document.getElementById("tableContainer").appendChild(t);
+}
+
+function showPoints() {
+    var t = document.createElement('table');
+    var r = document.createElement('tr');
+    r.appendChild(textCell('t2: ' + points.t2));
+    r.appendChild(textCell('t3: ' + points.t3));
+    t.appendChild(r);
+    document.getElementById("pointsContainer").appendChild(t);
+}
+
+function showStatus() {
+    var t = document.createElement('table');
+    var r = document.createElement('tr');
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        var stat = headers[i] + ': ' + systemStatus[headers[i]]; 
+        r.appendChild(textCell(stat));
+    }
+    t.appendChild(r);
+    document.getElementById("statusContainer").appendChild(t);
+}
+
+function showAssets() {
+    var assetsContainer = document.getElementById("assetsContainer");
+    var list = document.createElement('ul');
+    for (var id in systemAssets) {
+        var item = document.createElement('li');
+        var num = systemAssets[id];
+        var assetName = id.split('|')[0];
+        var type = assets[assetName].type;
+        var variant = id.split('|')[1];
+        item.appendChild(document.createTextNode(type + ' :: ' + assetName + ' (' + variant + ') : ' + num ));
+        list.appendChild(item);
+    }
+    assetsContainer.appendChild(list);
+}
+
+function toggleFilter(filter) {
+    assetFilters[filter] = assetFilters[filter] ? false : true;
+    if (assetFilters[filter]) {
+        filterGroups.forEach( function(group) {
+            if (group.includes(filter)) {
+                group.forEach( function(otherFilter) {
+                    if (filter != otherFilter) {
+                        assetFilters[otherFilter] = false;
+                    }
+                });
+            }
+        });
+    }
+    refresh();
+};
+
+function filterCell(filter) {
+    var f = textCell('[' + filter + ']');
+    if (assetFilters[filter]) {
+        f.style.backgroundColor = 'aqua';
+        f.style.color = 'black';
+    } else {
+        f.style.backgroundColor = '#105010';
+        f.style.color = 'aqua';
+    }
+    f.onclick = function() { toggleFilter(filter); };
+    return f;
+}
+
+function showFilters() {
+    var filtersContainer = document.getElementById("filtersContainer");
+    var t = document.createElement('table');
+    var r = document.createElement('tr');
+    for (var filter in assetFilters) {
+        var f = filterCell(filter);
+        r.appendChild(f);
+    }
+    t.appendChild(r);
+    filtersContainer.appendChild(t);
+}
+
+function init() {
+    assetFilters["can build"] = true;
+    showAssets();
+    showStatus();
+    showPoints();
+    showFilters();
+    assetTable();
+}
+
+function refresh() {
+    var assetsContainer = document.getElementById("assetsContainer");
+    assetsContainer.removeChild(assetsContainer.firstChild);
+    showAssets();
+    var statusContainer = document.getElementById("statusContainer");
+    statusContainer.removeChild(statusContainer.firstChild);
+    showStatus();
+    var pointsContainer = document.getElementById("pointsContainer");
+    pointsContainer.removeChild(pointsContainer.firstChild)
+    showPoints();
+    var filtersContainer = document.getElementById("filtersContainer");
+    filtersContainer.removeChild(filtersContainer.firstChild)
+    showFilters();
+    var tableContainer = document.getElementById("tableContainer");
+    tableContainer.removeChild(tableContainer.firstChild)
+    assetTable();
+}
+
+init();
+
+</script>
+</body>
+
