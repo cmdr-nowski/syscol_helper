@@ -1,5 +1,7 @@
 # syscol_helper
 
+![screenshot](https://github.com/cmdr-nowski/syscol_helper/blob/main/syscol.png?raw=true)
+
 barebones tool to try adding system colonisation assets for elite dangerous
 
 - models the dependencies and construction points requirements
