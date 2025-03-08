@@ -127,6 +127,8 @@ table {
     <div id="assetsContainer" class="stats"></div>
     <hr />
     <div id="statusContainer" class="stats"></div>
+    <p>asset economies</p>
+    <div id="economyContainer" class="stats"></div>
     <p>construction points</p>
     <div id="pointsContainer" class="points"></div>
   </div>
@@ -649,6 +651,8 @@ var assetFilters = {
     dev: false
 };
 
+var assetEconomies = {};
+var economyInfluences = {};
 var points = { t2: 0, t3: 0 };
 var systemAssets = {};
 var systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
@@ -660,16 +664,16 @@ var assetRequirements = {
     fufluns: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
     aegle: { req: ["consus", "picumnus", "annona", "ceres", "fornax"], reqText: 'an agricultural settlement' },
     tellus_e: { req: ["pistis", "soter", "aletheia"], reqText: 'a communications installation' },
-    io: { req: ["demeter"], reqText: 'a space farm' },
+    io: { req: ["demeter"], reqText: 'a space farm (agricultural installation)' },
     alala: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
     ares: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
     molae: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
     tellus_i: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
     eunostus: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
-    dicaeosyne: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
-    poena: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
-    eunomia: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
-    nomos: { req: ["enodia", "ichnaea"], reqText: 'a relay station' },
+    dicaeosyne: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
+    poena: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
+    eunomia: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
+    nomos: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
     astraeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
     coeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
     dodona: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
@@ -754,6 +758,21 @@ function addSystemAsset(asset, id) {
         systemAssets[id] = 1;
     }
 
+    if (asset.economy.initial != '-') {
+        if (asset.economy.initial in assetEconomies) {
+            assetEconomies[asset.economy.initial]++;
+        } else {
+            assetEconomies[asset.economy.initial] = 1;
+        }
+    }
+    if (asset.economy.influence != '-') {
+        if (asset.economy.influence in economyInfluences) {
+            economyInfluences[asset.economy.influence]++;
+        } else {
+            economyInfluences[asset.economy.influence] = 1;
+        }
+    }
+
     for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
         systemStatus[headers[i]] += asset.effect[headers[i]];
     }
@@ -766,6 +785,12 @@ function textHeader(str) {
     var c = document.createElement('th');
     c.appendChild(document.createTextNode(str));
     return c;
+}
+
+function textElement(elt, str) {
+    var e = document.createElement(elt);
+    e.appendChild(document.createTextNode(str));
+    return e;
 }
 
 function textCell(str) {
@@ -980,43 +1005,48 @@ function showStatus() {
     document.getElementById("statusContainer").appendChild(t);
 }
 
-function showStatusOld() {
-    var t = document.createElement('table');
-    var r = document.createElement('tr');
+function showEconomy() {
+    var c = document.getElementById('economyContainer');
 
-    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
-        var stat = headers[i] + ': ' + systemStatus[headers[i]]; 
-        r.appendChild(textCell(stat));
+    var sp = document.createElement('span');
+
+    var econList = document.createElement('ul');
+    for (var e in assetEconomies) {
+
+        var econItem = document.createElement('li');
+        var num = assetEconomies[e];
+        econItem.appendChild(textElement('li', e + ": " + num));
+        econList.appendChild(econItem);
     }
-    t.appendChild(r);
-    document.getElementById("statusContainer").appendChild(t);
-}
+    sp.appendChild(econList);
 
-function showSystemStatus() {
-    var statList = document.createElement('ul');
+    var infPara = textElement('p', 'economy influences');
+    sp.appendChild(infPara);
 
-    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
-        var statItem = document.createElement('li');
-        var stat = headers[i] + ': ' + systemStatus[headers[i]]; 
-        statItem.appendChild(document.createTextNode(stat));
-        statList.appendChild(statItem);
+    var infList = document.createElement('ul');
+    for (var i in economyInfluences) {
+        var infItem = document.createElement('li');
+        var num = economyInfluences[i];
+        infItem.appendChild(textElement('li', i + ": " + num));
+        infList.appendChild(infItem);
     }
-    document.getElementById("statusContainer").appendChild(statList);
+    sp.appendChild(infList);
+    c.appendChild(sp);
 }
 
 function intro() {
-    return 'Click green "[+]" on right to add assets. Click on green filters like "[tier 3]" to show matching assets (buildable filter enabled, click to disable.)'
+    return 'Click green "[+]" on right to add assets. Click on green filters like "[tier 3]" to show matching assets (buildable filter pre-enabled, click to disable.)'
             + ' When you add an asset, this text will disappear and assets will appear here. This is a WIP.';
 }
-
 
 function showAssets() {
 
     var assetsContainer = document.getElementById("assetsContainer");
 
     if (!numSystemAssets()) {
-        var p = document.createElement('p');
-        p.appendChild(document.createTextNode(intro()));
+
+        var p = textElement('p', intro());
+        p.style.color = 'orange';
         assetsContainer.appendChild(p);
         return;
     }
@@ -1080,6 +1110,7 @@ function init() {
     assetFilters["can build"] = true;
     showAssets();
     showStatus();
+    showEconomy();
     showPoints();
     showFilters();
     assetTable();
@@ -1092,6 +1123,9 @@ function refresh() {
     var statusContainer = document.getElementById("statusContainer");
     statusContainer.removeChild(statusContainer.firstChild);
     showStatus();
+    var economyContainer = document.getElementById("economyContainer");
+    economyContainer.removeChild(economyContainer.firstChild);
+    showEconomy();
     var pointsContainer = document.getElementById("pointsContainer");
     pointsContainer.removeChild(pointsContainer.firstChild);
     showPoints();
