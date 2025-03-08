@@ -25,7 +25,6 @@ Frontier Customer Services (https://forums.frontier.co.uk/threads/elite-dangerou
 
 .main {
   grid-area: main;
-  /* height: 100vw; */
   height: auto;
   border: 3px solid orange;
   border-radius: 12px;
@@ -811,9 +810,6 @@ function canAdd(asset) {
 function actions(asset, variant) {
 
     var id = asset.name + '|' + variant;
-    // var addrem = document.createElement('table');
-    // var addremRow = document.createElement('tr');
-
     var addCell;
 
     if (canAdd(asset)) {
@@ -827,12 +823,6 @@ function actions(asset, variant) {
     addCell.className = 'bigger';
 
     return addCell;
-
-    // addremRow.appendChild(addCell);
-    // addrem.appendChild(addremRow);
-    // addremCell = document.createElement('td');
-    // addremCell.appendChild(addrem);
-    // return addremCell;
 }
 
 function assetRow(assetName, variant) {
@@ -937,7 +927,6 @@ function statColour(stat) {
         return '#606060';
     }
     if (stat < -9) {
-        // return '#920872';
         return '#99004d';
     }
     if (stat < -4) {
@@ -1090,7 +1079,6 @@ function showFilters() {
 function init() {
     assetFilters["can build"] = true;
     showAssets();
-    // showSystemStatus();
     showStatus();
     showPoints();
     showFilters();
@@ -1103,7 +1091,6 @@ function refresh() {
     showAssets();
     var statusContainer = document.getElementById("statusContainer");
     statusContainer.removeChild(statusContainer.firstChild);
-    // showSystemStatus();
     showStatus();
     var pointsContainer = document.getElementById("pointsContainer");
     pointsContainer.removeChild(pointsContainer.firstChild);
