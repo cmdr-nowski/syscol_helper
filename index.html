@@ -1,19 +1,48 @@
 <html><head>
-<!-- 
+<!--
 https://github.com/cmdr-nowski/syscol_helper
 
 The Elite Dangerous game logic and names in this file remains the property of Frontier Developments plc, and is used here as authorized by
 Frontier Customer Services (https://forums.frontier.co.uk/threads/elite-dangerous-media-usage-rules.510879/).
 -->
 
-
 <style>
+
+.container {
+  width: 100%;
+  display: grid;
+  grid-template-areas: 'sidebar main' 'footer footer';
+  grid-template-columns: 31% 69%;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  height: auto;
+  border: 3px solid orange;
+  border-radius: 12px;
+  margin: 8px;
+}
+
+.main {
+  grid-area: main;
+  /* height: 100vw; */
+  height: auto;
+  border: 3px solid orange;
+  border-radius: 12px;
+  margin: 8px;
+}
+
+.footer{
+  grid-area: footer;
+  height: auto;
+  border: 3px solid orange;
+  border-radius: 12px;
+  margin: 8px;
+}
 
 body {
   background-color: #041224;
   color: #68dcec;
-  font-family: Verdana;
-  font-weight: 600;
 }
 
 td {
@@ -31,10 +60,16 @@ th {
 p {
   text-align: center;
 }
+li {
+  text-align: justify;
+}
 
-ul, li {
-  text-align: center;
+ul {
+  text-align: justify;
   background-color: #182440;
+  list-style-type: none;
+  margin: 0;
+  padding: 8;
 }
 
 table {
@@ -42,6 +77,23 @@ table {
   text-align: center;
   border: 1px solid #2ac0a8;
   border-collapse: collapse;
+}
+
+.builtAsset {
+  border: 1px solid #2ac0a8;
+  border-collapse: collapse;
+}
+
+.stat {
+  text-align: right;
+  border: none;
+  padding-right: 28px;
+  width: 75%;
+}
+.statName {
+  background-color: #182440;
+  text-align: left;
+  border: none;
 }
 
 .center {
@@ -54,6 +106,15 @@ table {
   width: 40%;
 }
 
+.bigger {
+  font-family: Verdana;
+  font-weight: 600;
+  padding: 8px;
+  margin: 2px;
+  border: 1px solid #2ac0a8;
+  border-collapse: collapse;
+}
+
 </style>
 
 <!-- <script src="system_assets_data.js"></script> -->
@@ -61,20 +122,28 @@ table {
 </head>
 
 <body>
-<p>system stats</p>
-<div id="statusContainer" class="center"></div>
-<p>construction points</p>
-<div id="pointsContainer" class="points"></div>
-<p>assets built</p><hr />
-<div id="assetsContainer" class="center"></div>
-<hr />
-<p>available assets</p>
-<div id="filtersContainer" class="center"></div>
-<div id="tableContainer" class="center"></div>
-<p>See: <a href="https://github.com/cmdr-nowski/syscol_helper">README</a></p>
+<div class="container">
+  <div class="sidebar">
+    <p>assets built</p><hr />
+    <div id="assetsContainer" class="stats"></div>
+    <hr />
+    <div id="statusContainer" class="stats"></div>
+    <p>construction points</p>
+    <div id="pointsContainer" class="points"></div>
+  </div>
+  <div class="main">
+    <p>available assets</p>
+    <div id="filtersContainer"></div>
+    <div id="tableContainer"></div>
+  </div>
+  <div class="footer">
+    <p align="center"><a href="https://github.com/cmdr-nowski/syscol_helper">README</a></p>
+  </div>
+</div>
+
 <script>
 
-const headers = ["asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy (initial)", "economy (influence)", ""];
+const headers = ["asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy", "influence", ""];
 
 const assets = {
    "coriolis": {
@@ -742,26 +811,28 @@ function canAdd(asset) {
 function actions(asset, variant) {
 
     var id = asset.name + '|' + variant;
-    var addrem = document.createElement('table');
-    var addremRow = document.createElement('tr');
+    // var addrem = document.createElement('table');
+    // var addremRow = document.createElement('tr');
 
     var addCell;
 
     if (canAdd(asset)) {
-        addCell = textCell('+');
+        addCell = textCell('[+]');
         addCell.style.backgroundColor = '#208040';
         addCell.onclick = function() { addSystemAsset(asset, id); };
     } else {
-        addCell = textCell(' ');
+        addCell = textCell('[_]');
         addCell.style.backgroundColor = '#808080';
     }
-    addCell.style.padding = '0px';
+    addCell.className = 'bigger';
 
-    addremRow.appendChild(addCell);
-    addrem.appendChild(addremRow);
-    addremCell = document.createElement('td');
-    addremCell.appendChild(addrem);
-    return addremCell;
+    return addCell;
+
+    // addremRow.appendChild(addCell);
+    // addrem.appendChild(addremRow);
+    // addremCell = document.createElement('td');
+    // addremCell.appendChild(addrem);
+    // return addremCell;
 }
 
 function assetRow(assetName, variant) {
@@ -860,7 +931,67 @@ function showPoints() {
     document.getElementById("pointsContainer").appendChild(t);
 }
 
+function statColour(stat) {
+
+    if (!stat) {
+        return '#606060';
+    }
+    if (stat < -9) {
+        // return '#920872';
+        return '#99004d';
+    }
+    if (stat < -4) {
+        return '#aa0000';
+    }
+    if (stat < 0) {
+        return '#d03812';
+    }
+    if (stat > 20) {
+        return '#1a991a';
+    }
+    if (stat > 10) {
+        return '#10a030';
+    }
+    if (stat > 5) {
+        return '#388038';
+    }
+    return '#446844'
+}
+
 function showStatus() {
+
+    var totalPos = 0;
+    var totalNeg = 0;
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        if (systemStatus[headers[i]] >= 0) {
+            totalPos += systemStatus[headers[i]];
+        } else {
+            totalNeg -= systemStatus[headers[i]];
+        }
+    }
+    var t = document.createElement('table');
+    var r = document.createElement('tr');
+    var c = textCell('system stats (totals: +' + totalPos + ', -' + totalNeg + ')');
+    c.colSpan = 2;
+    r.appendChild(c);
+    t.appendChild(r);
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        var r = document.createElement('tr');
+        var statName = textCell(headers[i]);
+        statName.className = 'statname';
+        r.appendChild(statName);
+        var stat = textCell(systemStatus[headers[i]]);
+        stat.className = 'stat';
+        stat.style.backgroundColor = statColour(systemStatus[headers[i]]);
+        r.appendChild(stat);
+        t.appendChild(r);
+    }
+
+    document.getElementById("statusContainer").appendChild(t);
+}
+
+function showStatusOld() {
     var t = document.createElement('table');
     var r = document.createElement('tr');
 
@@ -872,11 +1003,39 @@ function showStatus() {
     document.getElementById("statusContainer").appendChild(t);
 }
 
+function showSystemStatus() {
+    var statList = document.createElement('ul');
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        var statItem = document.createElement('li');
+        var stat = headers[i] + ': ' + systemStatus[headers[i]]; 
+        statItem.appendChild(document.createTextNode(stat));
+        statList.appendChild(statItem);
+    }
+    document.getElementById("statusContainer").appendChild(statList);
+}
+
+function intro() {
+    return 'Click green "[+]" on right to add assets. Click on green filters like "[tier 3]" to show matching assets (buildable filter enabled, click to disable.)'
+            + ' When you add an asset, this text will disappear and assets will appear here. This is a WIP.';
+}
+
+
 function showAssets() {
+
     var assetsContainer = document.getElementById("assetsContainer");
+
+    if (!numSystemAssets()) {
+        var p = document.createElement('p');
+        p.appendChild(document.createTextNode(intro()));
+        assetsContainer.appendChild(p);
+        return;
+    }
+
     var list = document.createElement('ul');
     for (var id in systemAssets) {
         var item = document.createElement('li');
+        item.className = 'builtAsset';
         var num = systemAssets[id];
         var assetName = id.split('|')[0];
         var type = assets[assetName].type;
@@ -931,6 +1090,7 @@ function showFilters() {
 function init() {
     assetFilters["can build"] = true;
     showAssets();
+    // showSystemStatus();
     showStatus();
     showPoints();
     showFilters();
@@ -943,15 +1103,16 @@ function refresh() {
     showAssets();
     var statusContainer = document.getElementById("statusContainer");
     statusContainer.removeChild(statusContainer.firstChild);
+    // showSystemStatus();
     showStatus();
     var pointsContainer = document.getElementById("pointsContainer");
-    pointsContainer.removeChild(pointsContainer.firstChild)
+    pointsContainer.removeChild(pointsContainer.firstChild);
     showPoints();
     var filtersContainer = document.getElementById("filtersContainer");
-    filtersContainer.removeChild(filtersContainer.firstChild)
+    filtersContainer.removeChild(filtersContainer.firstChild);
     showFilters();
     var tableContainer = document.getElementById("tableContainer");
-    tableContainer.removeChild(tableContainer.firstChild)
+    tableContainer.removeChild(tableContainer.firstChild);
     assetTable();
 }
 
