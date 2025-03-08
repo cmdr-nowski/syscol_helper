@@ -683,6 +683,16 @@ var assetRequirements = {
     pasithea: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'}
 }
 
+const statNames = {
+    pop: 'population',
+    mpop: 'max population',
+    sec: 'security',
+    wealth: 'wealth',
+    tech: 'technology',
+    sol: 'standard of living',
+    dev: 'development'
+};
+
 const spaceTypes = [
     'Starport (tier 2)',
     'Starport (tier 3)',
@@ -780,37 +790,23 @@ function addSystemAsset(asset, id) {
     refresh();
 }
 
-function textHeader(str) {
-
-    var c = document.createElement('th');
-    c.appendChild(document.createTextNode(str));
-    return c;
-}
-
 function textElement(elt, str) {
     var e = document.createElement(elt);
     e.appendChild(document.createTextNode(str));
     return e;
 }
 
-function textCell(str) {
-
-    var c = document.createElement('td');
-    c.appendChild(document.createTextNode(str));
-    return c;
-}
-
 function effectCell(asset, str) {
 
     var val = asset.effect[str];
     val = val > 0 ? '+' + val : val == 0 ? '-' : val;
-    return textCell(val);
+    return textElement('td', val);
 }
 
 function assetHeaders() {
     var r = document.createElement('tr');
     headers.forEach( function (str)  {
-        r.appendChild(textHeader(str));
+        r.appendChild(textElement('th', str));
     });
     return r;
 }
@@ -838,11 +834,11 @@ function actions(asset, variant) {
     var addCell;
 
     if (canAdd(asset)) {
-        addCell = textCell('[+]');
+        addCell = textElement('td', '[+]');
         addCell.style.backgroundColor = '#208040';
         addCell.onclick = function() { addSystemAsset(asset, id); };
     } else {
-        addCell = textCell('[_]');
+        addCell = textElement('td', '[_]');
         addCell.style.backgroundColor = '#808080';
     }
     addCell.className = 'bigger';
@@ -855,8 +851,8 @@ function assetRow(assetName, variant) {
     var asset = assets[assetName];
     var r = document.createElement('tr');
     var name = asset.name + ' (' + variant + ')';
-    r.appendChild(textCell(name));
-    r.appendChild(textCell(asset.type));
+    r.appendChild(textElement('td', name));
+    r.appendChild(textElement('td', asset.type));
     var costStr = '-';
     if (asset.cost.amount > 0) {
         costStr = asset.cost.amount + "xT" + asset.cost.tier;
@@ -866,14 +862,14 @@ function assetRow(assetName, variant) {
         gainStr = asset.gain.amount + "xT" + asset.gain.tier;
     }
 
-    r.appendChild(textCell(costStr));
-    r.appendChild(textCell(gainStr));
+    r.appendChild(textElement('td', costStr));
+    r.appendChild(textElement('td', gainStr));
 
     for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
         r.appendChild(effectCell(asset, headers[i]));
     }
-    r.appendChild(textCell(asset.economy.initial));
-    r.appendChild(textCell(asset.economy.influence));
+    r.appendChild(textElement('td', asset.economy.initial));
+    r.appendChild(textElement('td', asset.economy.influence));
     r.appendChild(actions(asset, variant));
     return r;
 }
@@ -940,8 +936,8 @@ function assetTable() {
 function showPoints() {
     var t = document.createElement('table');
     var r = document.createElement('tr');
-    r.appendChild(textCell('t2: ' + points.t2));
-    r.appendChild(textCell('t3: ' + points.t3));
+    r.appendChild(textElement('td', 't2: ' + points.t2));
+    r.appendChild(textElement('td', 't3: ' + points.t3));
     t.appendChild(r);
     document.getElementById("pointsContainer").appendChild(t);
 }
@@ -985,17 +981,17 @@ function showStatus() {
     }
     var t = document.createElement('table');
     var r = document.createElement('tr');
-    var c = textCell('system stats (totals: +' + totalPos + ', -' + totalNeg + ')');
+    var c = textElement('td', 'system stats (totals: +' + totalPos + ', -' + totalNeg + ')');
     c.colSpan = 2;
     r.appendChild(c);
     t.appendChild(r);
 
     for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
         var r = document.createElement('tr');
-        var statName = textCell(headers[i]);
+        var statName = textElement('td', statNames[headers[i]]);
         statName.className = 'statname';
         r.appendChild(statName);
-        var stat = textCell(systemStatus[headers[i]]);
+        var stat = textElement('td', systemStatus[headers[i]]);
         stat.className = 'stat';
         stat.style.backgroundColor = statColour(systemStatus[headers[i]]);
         r.appendChild(stat);
@@ -1007,16 +1003,11 @@ function showStatus() {
 
 function showEconomy() {
     var c = document.getElementById('economyContainer');
-
     var sp = document.createElement('span');
 
     var econList = document.createElement('ul');
     for (var e in assetEconomies) {
-
-        var econItem = document.createElement('li');
-        var num = assetEconomies[e];
-        econItem.appendChild(textElement('li', e + ": " + num));
-        econList.appendChild(econItem);
+        econList.appendChild(textElement('li', e + ': ' + assetEconomies[e]));
     }
     sp.appendChild(econList);
 
@@ -1025,18 +1016,22 @@ function showEconomy() {
 
     var infList = document.createElement('ul');
     for (var i in economyInfluences) {
-        var infItem = document.createElement('li');
-        var num = economyInfluences[i];
-        infItem.appendChild(textElement('li', i + ": " + num));
-        infList.appendChild(infItem);
+        infList.appendChild(textElement('li', i + ': ' + economyInfluences[i]));
     }
     sp.appendChild(infList);
     c.appendChild(sp);
 }
 
 function intro() {
-    return 'Click green "[+]" on right to add assets. Click on green filters like "[tier 3]" to show matching assets (buildable filter pre-enabled, click to disable.)'
-            + ' When you add an asset, this text will disappear and assets will appear here. This is a WIP.';
+    var s = document.createElement('span');
+    s.appendChild(textElement('p', 'Click a green "[+]" on the right to add an asset.'));
+    s.appendChild(textElement('p', 'Click filters like "[tier 3]" to show matching assets.'));
+    s.appendChild(textElement('p', 'Buildable filter is pre-enabled, click to disable.'));
+    s.appendChild(textElement('p', 'Adding assets may require construction points (tier 2 or tier 3). No points are required for the first station.'));
+    s.appendChild(textElement('p', 'Hit F5 to start again.'));
+    s.appendChild(textElement('p', 'When you add an asset, this text will disappear and assets will appear here.'));
+    s.appendChild(textElement('p', 'This is a WIP.'));
+    return s;
 }
 
 function showAssets() {
@@ -1045,13 +1040,14 @@ function showAssets() {
 
     if (!numSystemAssets()) {
 
-        var p = textElement('p', intro());
-        p.style.color = 'orange';
-        assetsContainer.appendChild(p);
+        var s = intro();
+        s.style.color = 'orange';
+        assetsContainer.appendChild(s);
         return;
     }
 
     var list = document.createElement('ul');
+
     for (var id in systemAssets) {
         var item = document.createElement('li');
         item.className = 'builtAsset';
@@ -1062,11 +1058,14 @@ function showAssets() {
         item.appendChild(document.createTextNode(type + ' :: ' + assetName + ' (' + variant + ') : ' + num ));
         list.appendChild(item);
     }
+
     assetsContainer.appendChild(list);
 }
 
 function toggleFilter(filter) {
+
     assetFilters[filter] = assetFilters[filter] ? false : true;
+
     if (assetFilters[filter]) {
         filterGroups.forEach( function(group) {
             if (group.includes(filter)) {
@@ -1082,7 +1081,9 @@ function toggleFilter(filter) {
 };
 
 function filterCell(filter) {
-    var f = textCell('[' + filter + ']');
+
+    var f = textElement('td', '[' + filter + ']');
+
     if (assetFilters[filter]) {
         f.style.backgroundColor = 'aqua';
         f.style.color = 'black';
@@ -1095,9 +1096,11 @@ function filterCell(filter) {
 }
 
 function showFilters() {
+
     var filtersContainer = document.getElementById("filtersContainer");
     var t = document.createElement('table');
     var r = document.createElement('tr');
+
     for (var filter in assetFilters) {
         var f = filterCell(filter);
         r.appendChild(f);
@@ -1116,29 +1119,28 @@ function init() {
     assetTable();
 }
 
+function refreshContainer(containerName, showFn) {
+    var c = document.getElementById(containerName);
+    c.removeChild(c.firstChild);
+    showFn();
+}
+
 function refresh() {
-    var assetsContainer = document.getElementById("assetsContainer");
-    assetsContainer.removeChild(assetsContainer.firstChild);
-    showAssets();
-    var statusContainer = document.getElementById("statusContainer");
-    statusContainer.removeChild(statusContainer.firstChild);
-    showStatus();
-    var economyContainer = document.getElementById("economyContainer");
-    economyContainer.removeChild(economyContainer.firstChild);
-    showEconomy();
-    var pointsContainer = document.getElementById("pointsContainer");
-    pointsContainer.removeChild(pointsContainer.firstChild);
-    showPoints();
-    var filtersContainer = document.getElementById("filtersContainer");
-    filtersContainer.removeChild(filtersContainer.firstChild);
-    showFilters();
-    var tableContainer = document.getElementById("tableContainer");
-    tableContainer.removeChild(tableContainer.firstChild);
-    assetTable();
+    const containers = {
+        'assetsContainer': showAssets,
+        'statusContainer': showStatus,
+        'economyContainer': showEconomy,
+        'pointsContainer': showPoints,
+        'filtersContainer': showFilters,
+        'tableContainer': assetTable
+    };
+
+    for (var c in containers) {
+        refreshContainer(c, containers[c]);
+    }
 }
 
 init();
 
 </script>
 </body>
-
