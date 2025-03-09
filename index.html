@@ -132,7 +132,7 @@ table {
 <body>
 <div class="container">
   <div class="sidebar">
-    <p>assets built</p><hr />
+    <p>system & assets</p><hr />
     <div id="assetsContainer" class="stats"></div>
     <hr />
     <div id="statusContainer" class="stats"></div>
@@ -142,7 +142,7 @@ table {
     <div id="pointsContainer" class="points"></div>
   </div>
   <div class="main">
-    <table width="100%"><tr><td width="70%"></td><td id="export">[export]</td><td id="import">[import]</td><td id="reset">[reset]</td></tr></table>
+    <table width="100%"><tr><td id="filtersContainer" width="70%"></td><td id="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td id="export">[export]</td><td id="import">[import]</td><td id="reset">[reset]</td></tr></table>
     <div id="filtersContainer"></div>
     <div id="tableContainer"></div>
   </div>
@@ -645,13 +645,15 @@ const assets = {
    }
 };
 
+var constructionFilters = [ 'can build', 'space', 'ground', 'tier 1', 'tier 2', 'tier 3'];
+
 var assetFilters = {
-    "can build": false,
+    'can build': false,
     space: false,
     ground: false,
-    "tier 1": false,
-    "tier 2": false,
-    "tier 3": false,
+    'tier 1': false,
+    'tier 2': false,
+    'tier 3': false,
     pop: false,
     mpop: false,
     sec: false,
@@ -660,6 +662,11 @@ var assetFilters = {
     sol: false,
     dev: false
 };
+
+const filterGroups = [
+    ['space', 'ground'],
+    ['tier 1', 'tier 2', 'tier 3']
+];
 
 var assetEconomies = {};
 var economyInfluences = {};
@@ -723,11 +730,6 @@ const groundTypes = [
     'Planetary port (tier 3)',
     'Odyssey Settlement',
     'Horizons settlement'
-];
-
-const filterGroups = [
-    ['space', 'ground'],
-    ['tier 1', 'tier 2', 'tier 3']
 ];
 
 function numSystemAssets() {
@@ -821,7 +823,12 @@ function effectCell(asset, str) {
 function assetHeaders() {
     var r = document.createElement('tr');
     headers.forEach( function (str)  {
-        r.appendChild(textElement('th', str));
+        
+        if (str in systemStatus) {
+            r.appendChild(filterElement('th', str));
+        } else {
+            r.appendChild(textElement('th', str));
+        }
     });
     return r;
 }
@@ -1037,14 +1044,33 @@ function showEconomy() {
     c.appendChild(sp);
 }
 
+function buildWarning() {
+    const p = document.createElement('p');
+    p.innerHTML = '***WARNING***</div> '
+                + 'the game <a href="https://forums.frontier.co.uk/threads/how-not-to-build-a-security-station-in-trailblazer.634795/">'
+                + 'builds the wrong type for some installations</a> '
+                + 'and lies about landing pads! <br/>';
+    p.style.color = '#ff4444';
+    return p;
+}
+
+function spreadsheetLink() {
+    const p = document.createElement('p');
+                + 'Check <a href="https://docs.google.com/spreadsheets/d/16_hh1G6Tb66OdS01Li0955lITp7yLleb3a8dmqVqq2o/">'
+                + "DaftMav's colonisation spreadheet</a> "
+                + 'before committing to building an asset!';
+    return p;
+}
+
 function intro() {
-    var s = document.createElement('span');
+    const s = document.createElement('span');
     s.appendChild(textElement('p', 'Click a green "[+]" on the right to add an asset.'));
     s.appendChild(textElement('p', 'Click filters like "[tier 3]" to show matching assets.'));
     s.appendChild(textElement('p', 'Buildable filter is pre-enabled, click to disable.'));
     s.appendChild(textElement('p', 'Adding assets may require construction points (tier 2 or tier 3). No points are required for the first station.'));
-    s.appendChild(textElement('p', 'Hit F5 to start again.'));
     s.appendChild(textElement('p', 'When you add an asset, this text will disappear and assets will appear here.'));
+    s.appendChild(buildWarning());
+    s.appendChild(spreadsheetLink());
     s.appendChild(textElement('p', 'This is a WIP.'));
     return s;
 }
@@ -1095,9 +1121,9 @@ function toggleFilter(filter) {
     refresh();
 };
 
-function filterCell(filter) {
+function filterElement(elt, filter) {
 
-    var f = textElement('td', '[' + filter + ']');
+    var f = textElement(elt, '[' + filter + ']');
 
     if (assetFilters[filter]) {
         f.style.backgroundColor = 'aqua';
@@ -1112,15 +1138,16 @@ function filterCell(filter) {
 
 function showFilters() {
 
-    var filtersContainer = document.getElementById("filtersContainer");
-    var t = document.createElement('table');
-    var r = document.createElement('tr');
+    const filtersContainer = document.getElementById("filtersContainer");
+    const t = document.createElement('table');
+    const r = document.createElement('tr');
 
-    for (var filter in assetFilters) {
-        var f = filterCell(filter);
+    for (var filter in constructionFilters) {
+        const f = filterElement('td', constructionFilters[filter]);
         r.appendChild(f);
     }
     t.appendChild(r);
+    t.style.tableLayout = 'fixed';
     filtersContainer.appendChild(t);
 }
 
