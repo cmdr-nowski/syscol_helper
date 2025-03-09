@@ -2,18 +2,17 @@
 
 ![screenshot](https://github.com/cmdr-nowski/syscol_helper/blob/main/syscol.png?raw=true)
 
-barebones tool to try adding system colonisation assets for elite dangerous
+Crude tool to experiment with system colonisation builds for Elite Dangerous
 
 - models the dependencies and construction points requirements
-- keeps track of system status effects
-- row with "can build" highlighted is clickable filters
+- keeps track of system status effects, basic economy facts
 - click green buttons on right to add assets
-- first station has no construction points, like in the game
-- to reset, use F5/ctl-R, etc.
+- export and import for saving system builds to a simple text file
 - try it at https://cmdr-nowski.github.io/syscol_helper/
 - no cargo amounts tracking
-- code is beginner (3 days) level javascript
-- crappy UI/UX
+- basic javascript only, no dependencies, run it at home
 - 90's html skills on show
-- more than likely buggy
+- UI/UX - I've heard of them
+- WIP, no warranty, hours and days spent hauling commodities are the responsibility of the user/cmdr.
+- patches welcome!
 
