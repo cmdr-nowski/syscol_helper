@@ -89,6 +89,7 @@ table {
   padding-right: 28px;
   width: 75%;
 }
+
 .statName {
   background-color: #182440;
   text-align: left;
@@ -114,9 +115,17 @@ table {
   border-collapse: collapse;
 }
 
-</style>
+#import, #export, #reset {
+  color: orange;
+  border: 2px solid orange;
 
-<!-- <script src="system_assets_data.js"></script> -->
+}
+
+.fileinput {
+  display: none;
+}
+
+</style>
 
 </head>
 
@@ -133,11 +142,12 @@ table {
     <div id="pointsContainer" class="points"></div>
   </div>
   <div class="main">
-    <p>available assets</p>
+    <table width="100%"><tr><td width="70%"></td><td id="export">[export]</td><td id="import">[import]</td><td id="reset">[reset]</td></tr></table>
     <div id="filtersContainer"></div>
     <div id="tableContainer"></div>
   </div>
   <div class="footer">
+    <div class="fileinput"><input type="file" id="importinput" /></div>
     <p align="center"><a href="https://github.com/cmdr-nowski/syscol_helper">README</a></p>
   </div>
 </div>
@@ -634,6 +644,7 @@ const assets = {
       economy: { initial: "-", influence: "industrial"}
    }
 };
+
 var assetFilters = {
     "can build": false,
     space: false,
@@ -654,6 +665,7 @@ var assetEconomies = {};
 var economyInfluences = {};
 var points = { t2: 0, t3: 0 };
 var systemAssets = {};
+var systemAssetsList = [];
 var systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
 
 var assetRequirements = {
@@ -741,7 +753,7 @@ function haveRequirementFor(id) {
     return true;
 }
 
-function addSystemAsset(asset, id) {
+function addSystemAsset(asset, id, doRefresh) {
 
     if (!haveRequirementFor(id)) {
         var variantName = idToVariant(id);  
@@ -767,6 +779,8 @@ function addSystemAsset(asset, id) {
         systemAssets[id] = 1;
     }
 
+    systemAssetsList.push(id);
+
     if (asset.economy.initial != '-') {
         if (asset.economy.initial in assetEconomies) {
             assetEconomies[asset.economy.initial]++;
@@ -786,7 +800,9 @@ function addSystemAsset(asset, id) {
         systemStatus[headers[i]] += asset.effect[headers[i]];
     }
 
-    refresh();
+    if (doRefresh) {
+        refresh();
+    }
 }
 
 function textElement(elt, str) {
@@ -835,7 +851,7 @@ function actions(asset, variant) {
     if (canAdd(asset)) {
         addCell = textElement('td', '[+]');
         addCell.style.backgroundColor = '#208040';
-        addCell.onclick = function() { addSystemAsset(asset, id); };
+        addCell.onclick = function() { addSystemAsset(asset, id, true); };
     } else {
         addCell = textElement('td', '[_]');
         addCell.style.backgroundColor = '#808080';
@@ -1108,6 +1124,77 @@ function showFilters() {
     filtersContainer.appendChild(t);
 }
 
+function assetFromId(id) {
+    const variantName = idToVariant(id);
+    for(assetName in assets) {
+        if (assets[assetName].variants.includes(variantName)) {
+            return assets[assetName];
+        }
+    }
+    return {};
+}
+
+function download() {
+
+    if (systemAssetsList.length < 1) {
+        alert("nothing to export!");
+        return;
+    }
+
+    const exportData = systemAssetsList.join("\n");
+    const file = new File([exportData], 'colonybuild.txt', { type: 'text/plain', });
+
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(file)
+
+    link.href = url
+    link.download = file.name
+    document.body.appendChild(link)
+    link.click()
+
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+}
+
+function importData() {
+    var importInput = document.getElementById('importinput');
+    importInput.click();
+}
+
+function reset() {
+    assetEconomies = {};
+    economyInfluences = {};
+    points = { t2: 0, t3: 0 };
+    systemAssets = {};
+    systemAssetsList = [];
+    systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
+    for (var filter in assetFilters) {
+      assetFilters[filter] = false;
+    }
+    assetFilters["can build"] = true;
+    refresh();
+}
+
+function handleFile() {
+    const fileList = this.files;
+    const theFile = fileList[0];
+    const reader = new FileReader();
+    reader.onload = function() {
+        reset();
+        const idList = reader.result.split("\n");
+        idList.forEach( function(id) {
+            const asset = assetFromId(id);
+            addSystemAsset(asset, id, false);
+        });
+        refresh();
+    }
+    
+    reader.onerror = function() {
+        alert("something went wrong, give up or try again if you have any idea what's going on");
+    }
+    reader.readAsText(theFile);
+}
+
 function init() {
     assetFilters["can build"] = true;
     showAssets();
@@ -1116,6 +1203,18 @@ function init() {
     showPoints();
     showFilters();
     assetTable();
+
+    const exportElt = document.getElementById('export');
+    exportElt.onclick = function() { download(); };
+
+    const importElt = document.getElementById('import');
+    importElt.onclick = function() { importData(); };
+
+    const resetElt = document.getElementById('reset');
+    resetElt.onclick = function() { reset(); };
+
+    const importInput = document.getElementById('importinput');
+    importInput.addEventListener("change", handleFile, false);
 }
 
 function refreshContainer(containerName, showFn) {
