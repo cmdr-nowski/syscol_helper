@@ -136,11 +136,78 @@ table {
   padding-bottom: 15px;
 }
 
+.modalContainer {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+.dialogContainer {
+  position: fixed;
+  width: 40%;
+  text-align: center;
+  top: 25%;
+  left: 50%;
+  padding: 20px;
+  transform: translate(-50%, 0);
+  overflow: auto;
+}
+
+.modal {
+  margin: 15% auto;
+  background-color: #081c44;
+  padding: 20px;
+  border: 1px solid #888;
+}
+
+.saveform {
+  align: right;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 </style>
 
 </head>
 
 <body>
+
+<div id="modalContainer" class="modalContainer">
+  <div id="exportDialog" class="dialogContainer">
+    <div class="modal">
+      <div class="close">&times;</div>
+      <div id="exportPreview"></div>
+      <div class="saveform">
+        <div id="exportForm">
+          <textarea id="exportData"></textarea><br/>
+          <label for="filename">file to save:</label>
+          <input type="text" id="filename" name="fileneame">
+          <input type="submit" value="export" id="exportBtn">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="container">
   <div class="sidebar">
     <p>colonised system</p><hr />
@@ -1203,8 +1270,6 @@ function showAssets() {
         undo.appendChild(document.createTextNode('remove last'));
     }
     undo.style.color = 'orange';
-    // undo.style.border = 'solid 1px orange';
-    // undo.style.padding = '5px;'
     undo.onclick = removeLastAsset;
 
     const list = document.createElement('ul');
@@ -1281,15 +1346,58 @@ function assetFromId(id) {
     return {};
 }
 
+function exportDialog() {
+    var modal = document.getElementById("modalContainer");
+    var exporter = document.getElementById("exportDialog");
+
+    var closeBtn = document.getElementsByClassName("close")[0];
+    closeBtn.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal || event.target == exporter) {
+            modal.style.display = "none";
+        }
+    };
+
+    var txt = document.getElementById('exportData');
+    while (txt.firstChild) {
+        txt.removeChild(txt.firstChild());
+    }
+
+    txt.cols = 40;
+    txt.rows = 8;
+    txt.style.backgroundColor = '#041224';
+    txt.style.color = '#68dcec';
+
+    var exportData = systemAssetsList.join("\n");
+    txt.value = exportData;
+
+    const filenameInput = document.getElementById('filename');
+    filenameInput.value = 'colonybuild.txt';
+
+    exportBtn = document.getElementById('exportBtn');
+    exportBtn.onclick = download;
+
+    modal.style.display = "inline-block";
+}
+
 function download() {
 
     if (systemAssetsList.length < 1) {
         alert("nothing to export!");
         return;
     }
+    const filenameInput = document.getElementById('filename');
+    const filename = filenameInput.value;
+    if (!filename) {
+        alert("no filename!");
+        return;
+    }
 
-    const exportData = systemAssetsList.join("\n");
-    const file = new File([exportData], 'colonybuild.txt', { type: 'text/plain', });
+    var exportData = systemAssetsList.join("\n");
+    const file = new File([exportData], filename, { type: 'text/plain', });
 
     const link = document.createElement('a')
     const url = URL.createObjectURL(file)
@@ -1352,7 +1460,7 @@ function init() {
     assetTable();
 
     const exportElt = document.getElementById('export');
-    exportElt.onclick = function() { download(); };
+    exportElt.onclick = function() { exportDialog(); };
 
     const importElt = document.getElementById('import');
     importElt.onclick = function() { importData(); };
