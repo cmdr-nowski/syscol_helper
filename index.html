@@ -78,6 +78,10 @@ table {
   border-collapse: collapse;
 }
 
+.nb {
+  border: none;
+}
+
 .builtAsset {
   border: 1px solid #2ac0a8;
   border-collapse: collapse;
@@ -125,6 +129,13 @@ table {
   display: none;
 }
 
+#assetsContainerHeader {
+  padding-top: 5;
+  padding-left: 4;
+  padding-right: 4;
+  padding-bottom: 15px;
+}
+
 </style>
 
 </head>
@@ -132,16 +143,18 @@ table {
 <body>
 <div class="container">
   <div class="sidebar">
-    <p>system & assets</p><hr />
-    <div id="assetsContainer" class="stats"></div>
+    <p>colonised system</p><hr />
+    <div id="assetsContainerHeader">
+    <table class="nb"><tr class="nb"><td class="nb" id="undo" width="30%"></td><td class="nb" width="40%">Ports, Stations, etc.</td><td class="nb" id="pointsContainer" width="30%"></td></tr></table>
+    </div>
+    <div id="assetsContainer"></div>
     <hr />
-    <div id="statusContainer" class="stats"></div>
+    <div id="statusContainer"></div>
     <p>asset economies</p>
-    <div id="economyContainer" class="stats"></div>
-    <p>construction points</p>
-    <div id="pointsContainer" class="points"></div>
+    <div id="economyContainer"></div>
   </div>
   <div class="main">
+    <p>colonisation assets</p>
     <table width="100%"><tr><td id="filtersContainer" width="70%"></td><td id="blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td id="export">[export]</td><td id="import">[import]</td><td id="reset">[reset]</td></tr></table>
     <div id="filtersContainer"></div>
     <div id="tableContainer"></div>
@@ -703,11 +716,11 @@ var assetRequirements = {
 
 const statNames = {
     pop: 'population',
-    mpop: 'max population',
+    mpop: 'max pop.',
     sec: 'security',
     wealth: 'wealth',
     tech: 'technology',
-    sol: 'standard of living',
+    sol: 'std. of living',
     dev: 'development'
 };
 
@@ -757,20 +770,21 @@ function haveRequirementFor(id) {
 
 function addSystemAsset(asset, id, doRefresh) {
 
+
     if (!haveRequirementFor(id)) {
-        var variantName = idToVariant(id);  
+        const variantName = idToVariant(id);
         alert("you must first build: " + assetRequirements[variantName].reqText);
         return;
     }
 
     if (asset.gain.amount > 0) {
-        var gainTier = 't' + asset.gain.tier;
+        const gainTier = 't' + asset.gain.tier;
         points[gainTier] += asset.gain.amount;
     }
     
     if (numSystemAssets() > 0) {
         if (asset.cost.amount > 0) {
-            var costTier = 't' + asset.cost.tier;
+            const costTier = 't' + asset.cost.tier;
             points[costTier] -= asset.cost.amount;
         }
     }
@@ -921,12 +935,14 @@ function isVisible(assetName) {
         }
     }
     if (assetFilters["tier 2"]) {
-        if (asset.cost.tier != 2) {
+
+        if ((asset.cost.amount < 1) || (asset.cost.tier !== 2)) {
             return false;
         }
     }
     if (assetFilters["tier 3"]) {
-        if (asset.cost.tier != 3) {
+        
+        if ((asset.cost.amount < 1) || (asset.cost.tier !== 3)) {
             return false;
         }
     }
@@ -961,7 +977,27 @@ function showPoints() {
     r.appendChild(textElement('td', 't2: ' + points.t2));
     r.appendChild(textElement('td', 't3: ' + points.t3));
     t.appendChild(r);
+    t.style.border = 'none';
     document.getElementById("pointsContainer").appendChild(t);
+}
+
+// straight from the C+P stackoverflow programming manual (https://stackoverflow.com/questions/66123016/interpolate-between-two-colours-based-on-a-percentage-value)
+function interpolateColour(c1, c2, factor) {
+  const r1 = parseInt(c1.substring(1, 3), 16);
+  const g1 = parseInt(c1.substring(3, 5), 16);
+  const b1 = parseInt(c1.substring(5, 7), 16);
+
+  const r2 = parseInt(c2.substring(1, 3), 16);
+  const g2 = parseInt(c2.substring(3, 5), 16);
+  const b2 = parseInt(c2.substring(5, 7), 16);
+
+  // Interpolate the RGB values
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+
+  // Convert the interpolated RGB values back to a hex color
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
 function statColour(stat) {
@@ -969,47 +1005,58 @@ function statColour(stat) {
     if (!stat) {
         return '#606060';
     }
-    if (stat < -9) {
-        return '#99004d';
-    }
-    if (stat < -4) {
-        return '#aa0000';
-    }
     if (stat < 0) {
-        return '#d03812';
+        return interpolateColour('#886028', '#800808', Math.max(stat, -20) / -20);
     }
-    if (stat > 20) {
-        return '#1a991a';
-    }
-    if (stat > 10) {
-        return '#10a030';
-    }
-    if (stat > 5) {
-        return '#388038';
-    }
-    return '#446844'
+    return interpolateColour('#608828', '#088008', Math.min(stat, 20) / 20);
 }
 
 function showStatus() {
 
     var totalPos = 0;
     var totalNeg = 0;
-    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
-        if (systemStatus[headers[i]] >= 0) {
-            totalPos += systemStatus[headers[i]];
+    var totalSpace = 0;
+    var totalGround = 0;
+    var totalTier1 = 0;
+    var totalTier2 = 0;
+    var totalTier3 = 0;
+
+    systemAssetsList.forEach( function(id) {
+
+        const asset = assetFromId(id);
+
+        if (spaceTypes.includes(asset.type)) {
+            totalSpace++;
         } else {
-            totalNeg -= systemStatus[headers[i]];
+            totalGround++;
         }
-    }
+
+        switch(asset.cost.tier) {
+            case '-':
+                totalTier1++;
+                break;
+            case 2:
+                totalTier2++;
+                break;
+            case 3:
+                totalTier3++;
+                break;
+        }
+    });
+
     var t = document.createElement('table');
-    var r = document.createElement('tr');
-    var c = textElement('td', 'system stats (totals: +' + totalPos + ', -' + totalNeg + ')');
+    var totalsRow = document.createElement('tr');
+    var totals = 'space: ' + totalSpace + ', ground: ' + totalGround
+                    + ', tier 1: ' + totalTier1 + ', tier 2: ' + totalTier2 + ', tier 3: ' + totalTier3;
+
+    var c = textElement('td', totals);
+
     c.colSpan = 2;
-    r.appendChild(c);
-    t.appendChild(r);
+    totalsRow.appendChild(c);
+    t.appendChild(totalsRow);
 
     for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
-        var r = document.createElement('tr');
+        const r = document.createElement('tr');
         var statName = textElement('td', statNames[headers[i]]);
         statName.className = 'statname';
         r.appendChild(statName);
@@ -1058,7 +1105,7 @@ function spreadsheetLink() {
     const p = document.createElement('p');
     p.innerHTML = 'Check <a href="https://docs.google.com/spreadsheets/d/16_hh1G6Tb66OdS01Li0955lITp7yLleb3a8dmqVqq2o/" style="color: #ff6644">'
                 + "DaftMav's colonisation spreadsheet</a> "
-                + 'before committing to building an asset!';
+                + 'before committing to building an asset in the actual game!';
     return p;
 }
 
@@ -1075,11 +1122,76 @@ function intro() {
     return s;
 }
 
+
+function removeLastAsset() {
+    const toRemove = systemAssetsList.pop();
+    if (!(toRemove in systemAssets)) {
+        alert('Data error, unable to remove ' + toRemove + '!');
+        return;
+    }
+    systemAssets[toRemove]--;
+    if (systemAssets[toRemove] < 1) {
+        delete systemAssets[toRemove];
+    }
+
+    removed = assetFromId(toRemove);
+    if (removed.cost.amount > 0 && systemAssetsList.length) {
+        const costTier = 't' + removed.cost.tier;
+        points[costTier] += removed.cost.amount;
+    }
+
+    if (removed.gain.amount > 0) {
+        const gainTier = 't' + removed.gain.tier;
+        points[gainTier] -= removed.gain.amount;
+    }
+
+    if (points["t2"] < 0 || points["t3"] < 0) {
+        alert("Data error, best reset I think");
+    }
+
+    if (removed.economy.initial != '-') {
+        if (removed.economy.initial in assetEconomies) {
+            if (assetEconomies[removed.economy.initial] > 1) {
+                assetEconomies[removed.economy.initial]--;
+            } else {
+                delete assetEconomies[removed.economy.initial];
+            }
+        } else {
+            alert("Economy (initial) in disarray!");
+        }
+    }
+
+    if (removed.economy.influence != '-') {
+        if (removed.economy.initial in assetEconomies) {
+            if (assetEconomies[removed.economy.influence] > 1) {
+                assetEconomies[removed.economy.influence]--;
+            } else {
+                delete assetEconomies[removed.economy.influence];
+            }
+        } else {
+            alert("Economy (influence) in disarray!");
+        }
+    }
+
+    for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
+        systemStatus[headers[i]] -= removed.effect[headers[i]];
+    }
+
+
+    refresh();
+}
+
 function showAssets() {
 
-    var assetsContainer = document.getElementById("assetsContainer");
+    const assetsContainer = document.getElementById("assetsContainer");
+    const undo = document.getElementById("undo");
 
     if (!numSystemAssets()) {
+
+        if (undo.firstChild) {
+            undo.removeChild(undo.firstChild);
+        }
+        undo.style.border = 'none';
 
         var s = intro();
         s.style.color = 'orange';
@@ -1087,7 +1199,15 @@ function showAssets() {
         return;
     }
 
-    var list = document.createElement('ul');
+    if (!undo.firstChild) {
+        undo.appendChild(document.createTextNode('remove last'));
+    }
+    undo.style.color = 'orange';
+    // undo.style.border = 'solid 1px orange';
+    // undo.style.padding = '5px;'
+    undo.onclick = removeLastAsset;
+
+    const list = document.createElement('ul');
 
     for (var id in systemAssets) {
         var item = document.createElement('li');
