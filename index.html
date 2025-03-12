@@ -782,6 +782,69 @@ const assets = {
    }
 };
 
+const padSizes = {
+    aerecura : 'Large',
+    ananke : 'Large',
+    antevorta : 'Large',
+    apollo : 'Large',
+    artemis : 'Large',
+    asteria : 'Large',
+    atropos : 'Large',
+    bia : 'Large',
+    ceres : 'Large',
+    chronos : 'Large',
+    clotho : 'Large',
+    comos : 'Large',
+    decima : 'Large',
+    dual_truss : 'Large',
+    erebus : 'Large',
+    fauna : 'Large',
+    fornax : 'Large',
+    fufluns : 'Large',
+    gaea : 'Large',
+    gelos : 'Large',
+    hephaestus : 'Large',
+    hestia : 'Large',
+    ice : 'Large',
+    lachesis : 'Large',
+    mefitis : 'Large',
+    meteope : 'Large',
+    minerva : 'Large',
+    necessitas : 'Large',
+    no_truss : 'Large',
+    nona : 'Large',
+    ocellus : 'Large',
+    opis : 'Large',
+    orcus : 'Large',
+    palici : 'Large',
+    picumnus : 'Large',
+    ponos : 'Large',
+    porrima : 'Large',
+    providentia : 'Large',
+    quad_truss : 'Large',
+    rock : 'Large',
+    tethys : 'Large',
+    aergia : 'Medium',
+    dysnomia : 'Medium',
+    enyo : 'Medium',
+    ioke : 'Medium',
+    mantus : 'Medium',
+    minthe : 'Medium',
+    nemesis : 'Medium',
+    plutus : 'Medium',
+    polemos : 'Medium',
+    prometheus : 'Medium',
+    vesta : 'Medium',
+    vulcan : 'Medium',
+    annona : 'Small',
+    asteria : 'Small',
+    bellona : 'Small',
+    caerus : 'Small',
+    fontus : 'Small',
+    ourea : 'Small',
+    pheobe : 'Small',
+};
+
 
 const assetTonnages = {
     no_truss: 53723,
@@ -795,7 +858,9 @@ const assetTonnages = {
     plutus: 18473,
     vulcan: 18473,
     vesta: 18473,
+    dysnomia: 18473,
     prometheus: 18473,
+    nemesis: 18473,
     hermese: 6720,
     angelia: 6720,
     eirene: 6720,
@@ -868,7 +933,7 @@ const assetTonnages = {
     enyo: 5684,
     polemos: 5684,
     minerva: 8526,
-    phoebe: 2841,
+    pheobe: 2841,
     asteria: 5682,
     caerus: 5682,
     chronos: 8523,
@@ -941,10 +1006,10 @@ const assetRequirements = {
     poena: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
     eunomia: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
     nomos: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
-    astraeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
-    coeus: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
-    dodona: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
-    dione: { req: ["phoebe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    astraeus: { req: ["pheobe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    coeus: { req: ["pheobe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    dodona: { req: ["pheobe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
+    dione: { req: ["pheobe", "asteria", "caerus", "chronos"], reqText: 'a bio research settlement'},
     hedone: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'},
     opora: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'},
     pasithea: { req: ["aergia", "comus", "gelos", "fufluns"], reqText: 'a tourism settlement'}
@@ -1586,6 +1651,7 @@ function showAssets() {
     let tbl = document.createElement('table');
     tbl.style.marginBottom = 'auto';
     let first = true;
+    let pos = '';
 
     for (var id in systemAssets) {
         let item = document.createElement('tr');
@@ -1601,7 +1667,10 @@ function showAssets() {
         let tonnage = assetTonnages[variant];
         if (first) {
             tonnage = Math.floor (tonnage * primarySurchargeFactors[tier - 1]);
+            pos = 'first';
             first = false;
+        } else {
+            pos = '';
         }
         tonnage = '~' + tonnage + 't';
         
@@ -1609,7 +1678,11 @@ function showAssets() {
         let assCell = document.createElement('td');
 
         mouseInOut(assCell, [
-            function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant); },
+            ( pos === 'first' ? 
+                function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant, 'first'); }
+            :
+                function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant); }
+            ),
             function() { this.style.background = '#021224'; this.style.color = '#68c0f0'; closeInfoPanel(); }
         ]);
 
@@ -1686,20 +1759,23 @@ function assetFromId(id) {
     return {};
 }
 
-function assetInfo(asset, variant) {
+function assetInfo(asset, variant, posn) {
 
-    let tonnage = 0;
-    if (variant in assetTonnages) {
-        tonnage = assetTonnages[variant] + ' tons';
-    }
+    let padSize = (variant in padSizes ? padSizes[variant] : 'none');
     let buildable = canAdd(asset) ? 'yes' : 'no';
     let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
     let tier = (asset.cost.amount == 0 ? '1' : asset.cost.tier ); 
     let location = spaceTypes.includes(asset.type) ? 'Space' : 'Surface';
-    // r.appendChild(textElement('td', location + ', tier\xa0' + tier));
-
-    let cost = ( asset.cost.amount ? asset.cost.amount  + ' tier ' + asset.cost.tier : 'no' ) + ' construction points';
-    let gain = ( asset.gain.amount ? asset.gain.amount  + ' tier ' + asset.gain.tier : 'no' ) + ' construction points';
+    let cost = ( asset.cost.amount ? asset.cost.amount  + 'x tier ' + asset.cost.tier : 'none' );
+    let gain = ( asset.gain.amount ? asset.gain.amount  + 'x tier ' + asset.gain.tier : 'none' );
+    let tonnage = 0;
+    let surchargeFactor = 1;
+    if (variant in assetTonnages) {
+        if (posn === 'first' || (canAdd(asset) && assetsListCurrent === 0)) {
+            surchargeFactor = primarySurchargeFactors[tier - 1];
+        }
+        tonnage = (Math.floor(assetTonnages[variant] * surchargeFactor)) + ' tons';
+    }
 
     let pos = [];
     let neg = [];
@@ -1739,8 +1815,9 @@ function assetInfo(asset, variant) {
         html += '<tr class="inf"><td class="inf">prerequisite facility: <b>' + assetRequirements[variant].reqText + '</b></td></tr>';
     }
 
-    html += '<tr class="inf"><td class="inf">effects: ' + effects + '</td></tr>';
     html += '<tr class="inf"><td class="inf">buildable: <b>' + buildable + '</td></tr>';
+    html += '<tr class="inf"><td class="inf">landing pad: <b>' + padSize + '</b></td></tr>';
+    html += '<tr class="inf"><td class="inf">effects: ' + effects + '</td></tr>';
     html += '<tr class="inf"><td class="inf">location: <b>' + location + '</b></td></tr>';
     html += '<tr class="inf"><td class="inf">cost: <b>' + cost + '</b></td></tr>';
     html += '<tr class="inf"><td class="inf">gain: <b>' + gain + '</b></td></tr>';
@@ -1755,14 +1832,14 @@ function closeInfoPanel() {
     modal.style.display = "none";
 }
 
-function infoBox(asset, variant) {
+function infoBox(asset, variant, pos) {
 
     let wrapper = document.getElementById("infoContainer");
     let infoPanel = document.getElementById("infoPanel");
     let exporter = document.getElementById("exportDialog");
     exporter.style.display = "none";
 
-    infoPanel.innerHTML = assetInfo(asset, variant); // '<p>info for ' + variant + '</p>';
+    infoPanel.innerHTML = assetInfo(asset, variant, pos); // '<p>info for ' + variant + '</p>';
 
     infoPanel.style.display = "inline-block";
     wrapper.style.display = "inline-block";
