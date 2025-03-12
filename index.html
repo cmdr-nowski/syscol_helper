@@ -2,8 +2,13 @@
 <!--
 https://github.com/cmdr-nowski/syscol_helper
 
-The Elite Dangerous game logic and names in this file remains the property of Frontier Developments plc, and is used here as authorized by
-Frontier Customer Services (https://forums.frontier.co.uk/threads/elite-dangerous-media-usage-rules.510879/).
+This webpage was uses game logic, names and and imagery from Elite Dangerous
+with the permission of Frontier Developments plc, for non-commercial purposes.
+See: https://forums.frontier.co.uk/threads/elite-dangerous-media-usage-rules.510879/.
+It is not endorsed by nor reflects the views or opinions of Frontier Developments and
+no employee of Frontier Developments was involved in making it.
+
+See also: https://www.elitedangerous.com
 -->
 
 <style>
@@ -41,7 +46,7 @@ Frontier Customer Services (https://forums.frontier.co.uk/threads/elite-dangerou
 
 body {
   background-color: #041224;
-  color: #68dcec;
+  color: #68c0f0;
 }
 
 td {
@@ -122,7 +127,6 @@ table {
 #import, #export, #reset {
   color: orange;
   border: 2px solid orange;
-
 }
 
 .fileinput {
@@ -139,7 +143,6 @@ table {
 #assetsContainer {
   overflow: auto;
   display: flex;
-/*  flex-direction: column-reverse; */
 }
 
 .modalContainer {
@@ -155,6 +158,20 @@ table {
   background-color: rgba(0,0,0,0.4);
 }
 
+.infoContainer {
+  display: none;
+  position: fixed;
+  top: 25%;
+  left: 66%;
+  z-index: 1;
+  width: 23%;
+  height: auto;
+  overflow: none;
+  transform: translate(-50%, 0);
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0);
+}
+
 .dialogContainer {
   position: fixed;
   width: 40%;
@@ -166,7 +183,34 @@ table {
   overflow: auto;
 }
 
-.exportDialog {
+.infoPanel{
+  margin: 4% 4%;
+  width: 100%;
+  background-color: #aaaaaa;
+  color: #021224;
+/*  padding: 10px; */
+  border: 2px solid #021224; 
+  border: 2px solid #cccccc; 
+  border-radius: 3px;
+}
+
+.infoTable {
+  border: 3px solid #021224;
+  width: 100%;
+  color: #021224;
+  text-align: right;
+  cellspacing: 0;
+  cellpadding: 0;
+}
+
+.inf {
+  border: none;
+  padding: 4;
+  text-align: left;
+}
+
+
+.visibleModal {
   margin: 15% auto;
   background-color: #181834;
   padding: 20px;
@@ -195,13 +239,17 @@ table {
 </head>
 <body>
 
+<div id="infoContainer" class="infoContainer">
+  <div id="infoPanel" class="infoPanel" style="display: none"></div>
+</div>
+
 <div id="modalContainer" class="modalContainer">
   <div id="dialogContainer" class="dialogContainer">
-    <div class="exportDialog">
+    <div id="exportDialog" class="visibleModal">
       <div class="close">&times;</div>
       <div id="exportPreview"></div>
       <div class="saveform">
-        <p>To control the save location, <a href="https://www.google.com/search?q=set+browser+to+ask+about+downloads&udm=14" target="_blank" style="color: #ff6644">set your browser to ask about downloads</a></p>
+        <p><font size="-1">(To control the save location, <a href="https://www.google.com/search?q=set+browser+to+ask+about+downloads&udm=14" target="_blank" style="color: #ff6644">set your browser to ask about downloads</a>)</font></p>
         <div id="exportForm">
           <textarea id="exportData"></textarea><br/>
           <label for="filename">file to save:</label>
@@ -214,9 +262,10 @@ table {
 </div>
 
 <div class="container">
-  <div class="sidebar">
+  <div class="sidebar" id="sidebar">
     <div id="assetsContainerHeader">
-    <table class="nb"><tr class="nb"><td class="nb" id="pointsContainer" width="30%"></td><td class="nb" width="40%">colonised system</td><td class="nb" width="30%"></td></tr></table>
+    <table class="nb"><tr class="nb"><td class="nb" width="30%"></td><td class="nb" width="40%">construction points:</td><td class="nb" width="30%" id="pointsContainer"></td></tr></table>
+    <!-- table class="nb"><tr class="nb"><td class="nb" id="pointsContainer" width="30%"></td><td class="nb" width="40%">colonised system</td><td class="nb" width="30%"></td></tr></table -->
     <hr/>
     <table class="nb"><tr class="nb"><td class="nb" id="undo" width="30%"></td><td class="nb" width="40%">Ports, Stations, etc.</td><td class="nb" id="redo" width="30%"></td></tr></table>
     </div>
@@ -248,7 +297,7 @@ const assets = {
    "Starport coriolis": {
       name: "coriolis",
       type: "Starport",
-      variants: ["0 truss","2 truss","4 truss"],
+      variants: ["no_truss","dual_truss","quad_truss"],
       cost: {tier: 2, amount: 3},
       gain: {tier: 3, amount: 1},
       effect: { pop: 1,mpop: 0,sec: -2,wealth: 2,tech: 1,sol: 3,dev: 2 },
@@ -452,27 +501,27 @@ const assets = {
       effect: { pop: 0,mpop: 0,sec: -2,wealth: 2,tech: 0,sol: 3,dev: 0 },
       economy: { initial: "-", influence: "tourism"}
    },
-   "Port Civilian": {
+   "Outpost Port Civilian": {
       name: "Civilian",
-      type: "Port",
+      type: "Outpost Port",
       variants: ["hestia","decima","atropos","nona","lachesis","clotho"],
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 2,mpop: 0,sec: -2,wealth: 0,tech: 0,sol: 3,dev: 0 },
       economy: { initial: "colony", influence: "-"}
    },
-   "Port Industrial": {
+   "Outpost Port Industrial": {
       name: "Industrial",
-      type: "Port",
+      type: "Outpost Port",
       variants: ["hephaestus","opis","ponos","tethys","bia","mefitis"],
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 1,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 0,dev: 0 },
       economy: { initial: "industrial", influence: "-"}
    },
-   "Port Scientific": {
+   "Outpost Port Scientific": {
       name: "Scientific",
-      type: "Port",
+      type: "Outpost Port",
       variants: ["necessitas","ananke","fauna","providentia","antevorta","porrima"],
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
@@ -733,6 +782,111 @@ const assets = {
    }
 };
 
+const assetTonnages = {
+    no_truss: 53723,
+    dual_truss: 53723,
+    quad_truss: 53723,
+    rock: 53723,
+    ice: 53723,
+    ocellus: 209031,
+    apollo: 209031,
+    artemis: 209031,
+    plutus: 18473,
+    vulcan: 18473,
+    vesta: 18473,
+    prometheus: 18473,
+    hermese: 6720,
+    angelia: 6720,
+    eirene: 6720,
+    pistis: 6720,
+    aletheia: 6720,
+    demeter: 6712,
+    apate: 6721,
+    laverna: 6721,
+    euthenia: 6723,
+    phorcys: 6723,
+    enodia: 6720,
+    ichnaea: 6720,
+    vacuna: 10080,
+    alastor: 10080,
+    dicaeosyne: 10082,
+    poena: 10082,
+    eunomia: 10082,
+    nomos: 10082,
+    harmonia: 10077,
+    asclepius: 10101,
+    eupraxia: 10101,
+    astraeus: 10083,
+    coeus: 10083,
+    dodona: 10083,
+    dione: 10083,
+    hedone: 10078,
+    opora: 10078,
+    pasithea: 10078,
+    dionysus: 10085,
+    bachus: 10085,
+    hestia: 36831,
+    hephaestus: 36831,
+    necessitas: 36831,
+    decima: 36831,
+    opis: 36831,
+    ananke: 36831,
+    atropos: 36831,
+    ponos: 36831,
+    fauna: 36831,
+    nona: 36831,
+    tethys: 36831,
+    providentia: 36831,
+    lachesis: 36831,
+    bia: 36831,
+    antevorta: 36831,
+    clotho: 36831,
+    mefitis: 36831,
+    porrima: 36831,
+    zeus: 215622,
+    hera: 215622,
+    poseidon: 215622,
+    aphrodite: 215622,
+    consus: 2839,
+    picumnus: 5678,
+    annona: 5678,
+    ceres: 8517,
+    fornax: 8517,
+    ourea: 2845,
+    mantus: 5690,
+    orcus: 5690,
+    erebus: 8535,
+    aerecura: 8535,
+    fontus: 2845,
+    metope: 5690,
+    palici: 5690,
+    minthe: 5690,
+    gaea: 8535,
+    ioke: 2842,
+    bellona: 5684,
+    enyo: 5684,
+    polemos: 5684,
+    minerva: 8526,
+    phoebe: 2841,
+    asteria: 5682,
+    caerus: 5682,
+    chronos: 8523,
+    aergia: 2846,
+    comus: 5692,
+    gelos: 5692,
+    fufluns: 8538,
+    tartarus: 9919,
+    aegle: 9850,
+    tellus_e: 9923,
+    io: 9921,
+    athena: 9924,
+    caelus: 9924,
+    alala: 9922,
+    ares: 9922,
+    silenus: 9919,
+    janus: 9921,
+};
+
 const constructionFilters = [ 'can build', 'space', 'ground', 'tier 1', 'tier 2', 'tier 3'];
 
 let assetFilters = {
@@ -755,6 +909,9 @@ const filterGroups = [
     ['space', 'ground'],
     ['tier 1', 'tier 2', 'tier 3']
 ];
+
+const primarySurchargeFactors = [ 1.16, 1.32, 1.20 ];
+
 
 let assetEconomies = {};
 let economyInfluences = {};
@@ -894,8 +1051,30 @@ function addSystemAsset(asset, variant, doRefresh) {
     }
 }
 
-function textElement(elt, str) {
+function mouseInOut(elt, fns) {
+    elt.addEventListener( "mouseover", fns[0] );
+    elt.addEventListener( "mouseout", fns[1] );
+}
+
+
+function textElement(elt, str, fType, fn) {
     let e = document.createElement(elt);
+
+    switch(fType) {
+        case 'mouseover':
+            e.onmouseover = fn; 
+            break;
+        case 'mouseInOut':
+            mouseInOut(e, fn);
+            // e.addEventListener("mouseover", fn[0] ); 
+            // e.addEventListener("mouseout",  fn[1] );
+            break;
+
+
+        default:
+            break;
+    }
+
     e.appendChild(document.createTextNode(str));
     return e;
 }
@@ -909,6 +1088,7 @@ function effectCell(asset, str) {
 
 function assetHeaders() {
     let r = document.createElement('tr');
+    r.onmouseover = function() { closeInfoPanel(); };
     headers.forEach( function (str)  {
         
         if (str in systemStatus) {
@@ -940,7 +1120,7 @@ function canAdd(asset) {
 function actions(asset, variant) {
 
     let id = asset.name + '|' + variant;
-    let addCell;
+    var addCell;
 
     if (canAdd(asset)) {
         addCell = textElement('td', '[+]');
@@ -950,7 +1130,6 @@ function actions(asset, variant) {
         addCell = textElement('td', '[_]');
         addCell.style.backgroundColor = '#808080';
     }
-    addCell.className = 'bigger';
 
     return addCell;
 }
@@ -960,8 +1139,14 @@ function assetRow(assetName, variant) {
     let asset = assets[assetName];
     let r = document.createElement('tr');
     r.appendChild(actions(asset, variant));
+
     let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
-    r.appendChild(textElement('td', name));
+    let assCell = textElement('td', name, 'mouseInOut', [
+            function() { infoBox(asset, variant); },
+            function() { closeInfoPanel(); }
+    ]); 
+
+    r.appendChild(assCell);
 
     let tier = (asset.cost.amount == 0 ? '1' : asset.cost.tier ); 
     let location = spaceTypes.includes(asset.type) ? 'Space' : 'Surface';
@@ -1052,8 +1237,12 @@ function assetTable() {
 function showPoints() {
     let t = document.createElement('table');
     let r = document.createElement('tr');
-    r.appendChild(textElement('td', 't2: ' + points.t2));
-    r.appendChild(textElement('td', 't3: ' + points.t3));
+    let c = textElement('td', 't2: ' + points.t2);
+    c.style.border="none";
+    r.appendChild(c);
+    c = textElement('td', 't3: ' + points.t3);
+    c.style.border="none";
+    r.appendChild(c);
     t.appendChild(r);
     t.style.border = 'none';
     document.getElementById("pointsContainer").appendChild(t);
@@ -1097,11 +1286,14 @@ function showStatus() {
     let totalTier1 = 0;
     let totalTier2 = 0;
     let totalTier3 = 0;
+    let totalTonnage = 0;
+    let firstStationFactor = 1.12;
 
     let i = 0;
     while (i < assetsListCurrent) {
 
         let id = systemAssetsList[i]; 
+        let variant = idToVariant(id);
         let asset = assetFromId(id);
 
         if (spaceTypes.includes(asset.type)) {
@@ -1110,12 +1302,16 @@ function showStatus() {
             totalGround++;
         }
 
+        tier = 1;
+
         switch(asset.cost.tier) {
             case 2:
                 totalTier2++;
+                tier = 2;
                 break;
             case 3:
                 totalTier3++;
+                tier = 3;
                 break;
             case 0:
                 totalTier1++;
@@ -1124,13 +1320,18 @@ function showStatus() {
                 alert("tier totals for tier " + asset.cost.tier + "?! Unpossible!");
                 break;
         }
+        if (i === 0) {
+            totalTonnage += Math.floor(assetTonnages[variant] * primarySurchargeFactors[tier - 1]);
+        } else {
+            totalTonnage += assetTonnages[variant];
+        }
         i++;
     }
 
     let t = document.createElement('table');
     t.style.tableLayout = 'fixed';
     let totalsRow = document.createElement('tr');
-    let totals = 'space: ' + totalSpace + ', ground: ' + totalGround
+    let totals = 'tons: ~' + totalTonnage + ', space: ' + totalSpace + ', ground: ' + totalGround
                     + ', tier 1: ' + totalTier1 + ', tier 2: ' + totalTier2 + ', tier 3: ' + totalTier3;
 
     let c = textElement('td', totals);
@@ -1214,7 +1415,7 @@ function intro() {
     const s = document.createElement('span');
     s.appendChild(textElement('p', 'Click a green "[+]" on the right to add an asset.'));
     s.appendChild(textElement('p', 'Click filters like "[tier 3]" to show matching assets.'));
-    s.appendChild(textElement('p', 'Buildable filter is pre-enabled, click to disable.'));
+    s.appendChild(textElement('p', 'Buildable filter ("can build") is pre-enabled, click to disable.'));
     s.appendChild(textElement('p', 'Adding assets may require construction points (tier 2 or tier 3). No points are required for the first station.'));
     s.appendChild(textElement('p', 'When you add an asset, this text will disappear and assets will appear here.'));
     s.appendChild(buildWarning());
@@ -1378,8 +1579,7 @@ function showAssets() {
     }
 
     assetsContainer.style.flexDirection = 'column-reverse';
-    assetsContainer.style.height = '45vh';
-
+    assetsContainer.style.height = '42vh';
 
     if (!undo.firstChild) {
         undo.appendChild(document.createTextNode('remove last'));
@@ -1387,18 +1587,14 @@ function showAssets() {
     undo.style.color = 'orange';
     undo.onclick = removeLastAsset;
         
-    // const list = document.createElement('ul');
     let tbl = document.createElement('table');
     tbl.style.marginBottom = 'auto';
+    let first = true;
 
     for (var id in systemAssets) {
-        // let item = document.createElement('li');
         let item = document.createElement('tr');
-        // item.style.strong = 'orange';
-        // item.className = 'builtAsset';
         let num = systemAssets[id];
         let assetName = id.split('|')[0];
-        // alert('id: ' + id + ', assname: ' + assetName);
         let asset = assets[assetName];
         let type = asset.type;
         let name = asset.name;
@@ -1406,13 +1602,26 @@ function showAssets() {
         let location = spaceTypes.includes(asset.type) ? 'space' : 'surface';
         let variant = id.split('|')[1];
 
-        let assCell = document.createElement('td');
-        assCell.style.textAlign = 'left';
-        assCell.innerHTML = '<b>' + ucFirst(name) + ' ' + type + "</b> ('" + variant + "', tier " + tier + ', ' + location + ')';
+        let tonnage = assetTonnages[variant];
+        if (first) {
+            tonnage = Math.floor (tonnage * primarySurchargeFactors[tier - 1]);
+            first = false;
+        }
+        tonnage = '~' + tonnage + 't';
+        
 
+        let assCell = document.createElement('td');
+
+        mouseInOut(assCell, [
+                function() { infoBox(asset, variant); }, 
+                function() { closeInfoPanel(); },
+        ]);
+
+        assCell.style.textAlign = 'left';
+        assCell.innerHTML = '<b>' + ucFirst(name) + ' ' + type + '</b>: ' + tonnage + ', tier ' + tier + ", '" + variant + "'";
         let numCell = document.createElement('td');
         numCell.style.textAlign = 'right';
-        numCell.innerHTML = '<b>(' + num + ')</b>';
+        numCell.innerHTML = '<b>(x' + num + ')</b>';
         item.appendChild(assCell);
         item.appendChild(numCell);
         tbl.appendChild(item);
@@ -1481,16 +1690,101 @@ function assetFromId(id) {
     return {};
 }
 
+function assetInfo(asset, variant) {
+
+    let tonnage = 0;
+    if (variant in assetTonnages) {
+        tonnage = assetTonnages[variant] + ' tons';
+    }
+    let buildable = canAdd(asset) ? 'yes' : 'no';
+    let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
+    let tier = (asset.cost.amount == 0 ? '1' : asset.cost.tier ); 
+    let location = spaceTypes.includes(asset.type) ? 'Space' : 'Surface';
+    // r.appendChild(textElement('td', location + ', tier\xa0' + tier));
+
+    let cost = ( asset.cost.amount ? asset.cost.amount  + ' tier ' + asset.cost.tier : 'no' ) + ' construction points';
+    let gain = ( asset.gain.amount ? asset.gain.amount  + ' tier ' + asset.gain.tier : 'no' ) + ' construction points';
+
+    let pos = [];
+    let neg = [];
+    let effects = '';
+    for (var stat in systemStatus) {
+        if (asset.effect[stat] > 0) {
+            pos.push(stat);
+        } else if (asset.effect[stat] < 0) {
+            neg.push(stat);
+        }
+    }
+
+    if (pos.length) {
+        effects += '<font color="green">';
+        effects += pos.join(', ');
+        effects += '</font>\x0a';
+    }
+
+    if (neg.length) {
+        effects += '<font color="#882828">'
+        effects += neg.join(', ');
+        effects += '</font>';
+    }
+
+
+
+    let html = '<table class="infoTable">';
+    html += '<tr class="inf"><td class="inf"><img height="150px" width="100%" src="img/sc_' + variant + '.jpg"/></td></tr>';
+    html += '<tr class="inf"><td class="inf"><b>' + name + '</b></td></tr>';
+    if (variant === 'ichnaea') {
+        html += '<tr class="inf"><td><b><font color="#882020">***currently bugged***: constructs a comms installation instead</font></b></td></tr>';
+    } else if (variant === 'eirene') { 
+        html += '<tr class="inf"><td><b><font color="#882020">***currently bugged***: constructs a scientific installation instead</font></b></td></tr>';
+    }
+
+    if (variant in assetRequirements) {
+        html += '<tr class="inf"><td class="inf">prerequisite facility: <b>' + assetRequirements[variant].reqText + '</b></td></tr>';
+    }
+
+    html += '<tr class="inf"><td class="inf">effects: ' + effects + '</td></tr>';
+    html += '<tr class="inf"><td class="inf">buildable: <b>' + buildable + '</td></tr>';
+    html += '<tr class="inf"><td class="inf">location: <b>' + location + '</b></td></tr>';
+    html += '<tr class="inf"><td class="inf">cost: <b>' + cost + '</b></td></tr>';
+    html += '<tr class="inf"><td class="inf">gain: <b>' + gain + '</b></td></tr>';
+    html += '<tr class="inf"><td class="inf">hauling requirement (approx): <b>' + tonnage + '</b></td></tr>';
+    html += '</table>';
+    return html;
+
+}
+
+function closeInfoPanel() {
+    let modal = document.getElementById("infoContainer");
+    modal.style.display = "none";
+}
+
+function infoBox(asset, variant) {
+
+    let wrapper = document.getElementById("infoContainer");
+    let infoPanel = document.getElementById("infoPanel");
+    let exporter = document.getElementById("exportDialog");
+    exporter.style.display = "none";
+
+    infoPanel.innerHTML = assetInfo(asset, variant); // '<p>info for ' + variant + '</p>';
+
+    infoPanel.style.display = "inline-block";
+    wrapper.style.display = "inline-block";
+}
+
+
 function exportDialog() {
     let modal = document.getElementById("modalContainer");
+    let wrapper = document.getElementById("dialogContainer");
     let exporter = document.getElementById("exportDialog");
     let closeBtn = document.getElementsByClassName("close")[0];
+
     closeBtn.onclick = function() {
         modal.style.display = "none";
     }
 
     window.onclick = function(event) {
-        if (event.target == modal || event.target == exporter) {
+        if (event.target == modal || event.target == wrapper) {
             modal.style.display = "none";
         }
     };
@@ -1515,6 +1809,8 @@ function exportDialog() {
     exportBtn = document.getElementById('exportBtn');
     exportBtn.onclick = download;
 
+    infoPanel.style.display = "none";
+    exporter.style.display = "inline-block";
     modal.style.display = "inline-block";
 }
 
@@ -1530,7 +1826,6 @@ function download() {
         alert("no filename!");
         return;
     }
-
     
     let exportList = systemAssetsList.slice(0, assetsListCurrent);
     let exportData = exportList.join("\n");
@@ -1561,6 +1856,7 @@ function reset() {
     systemAssetsList = [];
     assetsListCurrent = 0;
     systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
+
     for (var filter in assetFilters) {
       assetFilters[filter] = false;
     }
@@ -1578,7 +1874,9 @@ function importFromFile() {
         idList.forEach( function(id) {
             let variant = idToVariant(id);
             let asset = assetFromId(id);
-            addSystemAsset(asset, variant, false);
+            if  (variant) {
+                addSystemAsset(asset, variant, false);
+            }
         });
         refresh();
     }
