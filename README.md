@@ -10,6 +10,7 @@ Tool to experiment with system colony builds for Elite Dangerous
 - Click green column headers to filter
 - Export and import for saving system builds to a simple text file
 - IF IMPORT NO LONGER WORKS: edit import file, change "0 truss" to no_truss, "2 truss" to dual_truss and "4 truss" to quad_truss
+- IF IT STILL DOESN'T WORK: as per the open issue, construction point cost for small/medium tourist settlements was incorrect. If your build includes these, it may now load now it's fixed. Nothing to be done for this, I'm afraid.
 - Undo and redo
 - Cargo amounts tracking (approx totals only)
 - Try it at https://cmdr-nowski.github.io/syscol_helper/
