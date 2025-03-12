@@ -1056,7 +1056,6 @@ function mouseInOut(elt, fns) {
     elt.addEventListener( "mouseout", fns[1] );
 }
 
-
 function textElement(elt, str, fType, fn) {
     let e = document.createElement(elt);
 
@@ -1066,11 +1065,7 @@ function textElement(elt, str, fType, fn) {
             break;
         case 'mouseInOut':
             mouseInOut(e, fn);
-            // e.addEventListener("mouseover", fn[0] ); 
-            // e.addEventListener("mouseout",  fn[1] );
             break;
-
-
         default:
             break;
     }
@@ -1142,8 +1137,8 @@ function assetRow(assetName, variant) {
 
     let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
     let assCell = textElement('td', name, 'mouseInOut', [
-            function() { infoBox(asset, variant); },
-            function() { closeInfoPanel(); }
+            function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant); },
+            function() { this.style.background = '#021224'; this.style.color = '#68c0f0'; closeInfoPanel(); }
     ]); 
 
     r.appendChild(assCell);
@@ -1613,8 +1608,8 @@ function showAssets() {
         let assCell = document.createElement('td');
 
         mouseInOut(assCell, [
-                function() { infoBox(asset, variant); }, 
-                function() { closeInfoPanel(); },
+            function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant); },
+            function() { this.style.background = '#021224'; this.style.color = '#68c0f0'; closeInfoPanel(); }
         ]);
 
         assCell.style.textAlign = 'left';
