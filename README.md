@@ -9,6 +9,7 @@ Tool to experiment with system colony builds for Elite Dangerous
 - Click green '+' signs to add facilities 
 - Click green column headers to filter
 - Export and import for saving system builds to a simple text file
+- IF IMPORT NO LONGER WORKS: edit import file, change "0 truss" to no_truss, "2 truss" to dual_truss and "4 truss" to quad_truss
 - Undo and redo
 - Cargo amounts tracking (approx totals only)
 - Try it at https://cmdr-nowski.github.io/syscol_helper/
