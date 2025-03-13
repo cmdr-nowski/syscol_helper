@@ -45,7 +45,7 @@ See also: https://www.elitedangerous.com
 }
 
 body {
-  background-color: #041224;
+  background-color: #12122c;
   color: #68c0f0;
 }
 
@@ -64,6 +64,7 @@ th {
 p {
   text-align: center;
 }
+
 li {
   text-align: justify;
 }
@@ -186,7 +187,7 @@ table {
 .infoPanel{
   margin: 4% 4%;
   width: 100%;
-  background-color: #aaaaaa;
+  background-color: #aaaacc;
   color: #021224;
 /*  padding: 10px; */
   border: 2px solid #021224; 
@@ -209,9 +210,14 @@ table {
   text-align: left;
 }
 
-.tPointsImg {
+.tPointsImgB {
     height: 1.3em; 
 }
+
+.tPointsImg {
+    height: 1em; 
+}
+
 
 .visibleModal {
   margin: 15% auto;
@@ -985,6 +991,9 @@ const filterGroups = [
 
 const primarySurchargeFactors = [ 1.16, 1.32, 1.20 ];
 
+const t2Img = '<img class="tPointsImg" src="img/t2.png">';
+const t3Img = '<img class="tPointsImg" src="img/t3.png">';
+
 
 let assetEconomies = {};
 let economyInfluences = {};
@@ -1240,15 +1249,16 @@ function assetRow(assetName, variant) {
 
     let costStr = '-';
     if (asset.cost.amount > 0) {
-        costStr = asset.cost.amount + "xT" + asset.cost.tier;
+        costStr = asset.cost.amount + '&nbsp;' + (asset.cost.tier == 2 ? t2Img : t3Img);
     }
     let gainStr = '-';
     if (asset.gain.amount > 0) {
-        gainStr = asset.gain.amount + "xT" + asset.gain.tier;
+        // gainStr = asset.gain.amount + "xT" + asset.gain.tier;
+        gainStr = asset.gain.amount + '&nbsp;' + (asset.gain.tier == 2 ? t2Img : t3Img);
     }
 
-    r.appendChild(textElement('td', costStr));
-    r.appendChild(textElement('td', gainStr));
+    r.appendChild(htmlElement('td', costStr));
+    r.appendChild(htmlElement('td', gainStr));
 
     for (var i = headers.indexOf('pop'); i < headers.indexOf('dev') + 1; i++) {
         r.appendChild(effectCell(asset, headers[i]));
@@ -1323,10 +1333,10 @@ function assetTable() {
 function showPoints() {
     let t = document.createElement('table');
     let r = document.createElement('tr');
-    let c = htmlElement('td', '<img class="tPointsImg" src="img/t2.png"> <b>' + points.t2 + '</b>');
+    let c = htmlElement('td', '<img class="tPointsImgB" src="img/t2.png"> <b>' + points.t2 + '</b>');
     c.style.border="none";
     r.appendChild(c);
-    c = htmlElement('td', '<img class="tPointsImg" src="img/t3.png"> <b>' + points.t3 + '</b>');
+    c = htmlElement('td', '<img class="tPointsImgB" src="img/t3.png"> <b>' + points.t3 + '</b>');
     c.style.border="none";
     r.appendChild(c);
     t.appendChild(r);
@@ -1794,14 +1804,14 @@ function assetInfo(asset, variant, posn) {
 
     let costImg =  ( asset.cost.amount ? 'img/t' + asset.cost.tier + '.png' : '' );
     if (costImg) {
-        costImg = '<img class="tPointsImg" src="' + costImg + '">';
+        costImg = '<img class="tPointsImgB" src="' + costImg + '">';
     }
     // let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>\x0a\x0ax\x0a\x0a' + costImg : 'none' );
     let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>&nbsp;&nbsp;' + costImg : 'none' );
 
     let gainImg = ( asset.gain.amount ? 'img/t' + asset.gain.tier + '.png' : '' );
     if (gainImg) {
-        gainImg = '<img class="tPointsImg" src="' + gainImg + '">';
+        gainImg = '<img class="tPointsImgB" src="' + gainImg + '">';
     }
     let gain = ( asset.gain.amount ? '<b>' + asset.gain.amount + '</b>&nbsp;&nbsp;' + gainImg : 'none' );
 
@@ -1906,7 +1916,7 @@ function exportDialog() {
 
     txt.cols = 40;
     txt.rows = 8;
-    txt.style.backgroundColor = '#041224';
+    txt.style.backgroundColor = '#12122c';
     txt.style.color = '#68dcec';
 
     let exportList = systemAssetsList.slice(0, assetsListCurrent);
