@@ -209,6 +209,9 @@ table {
   text-align: left;
 }
 
+.tPointsImg {
+    height: 1.3em; 
+}
 
 .visibleModal {
   margin: 15% auto;
@@ -1144,6 +1147,24 @@ function textElement(elt, str, fType, fn) {
     return e;
 }
 
+function htmlElement(elt, str, fType, fn) {
+    let e = document.createElement(elt);
+
+    switch(fType) {
+        case 'mouseover':
+            e.onmouseover = fn; 
+            break;
+        case 'mouseInOut':
+            mouseInOut(e, fn);
+            break;
+        default:
+            break;
+    }
+
+    e.innerHTML = str;
+    return e;
+}
+
 function effectCell(asset, str) {
 
     let val = asset.effect[str];
@@ -1302,10 +1323,10 @@ function assetTable() {
 function showPoints() {
     let t = document.createElement('table');
     let r = document.createElement('tr');
-    let c = textElement('td', 't2: ' + points.t2);
+    let c = htmlElement('td', '<img class="tPointsImg" src="img/t2.png"> <b>' + points.t2 + '</b>');
     c.style.border="none";
     r.appendChild(c);
-    c = textElement('td', 't3: ' + points.t3);
+    c = htmlElement('td', '<img class="tPointsImg" src="img/t3.png"> <b>' + points.t3 + '</b>');
     c.style.border="none";
     r.appendChild(c);
     t.appendChild(r);
@@ -1770,8 +1791,20 @@ function assetInfo(asset, variant, posn) {
     let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
     let tier = (asset.cost.amount == 0 ? '1' : asset.cost.tier ); 
     let location = spaceTypes.includes(asset.type) ? 'Space' : 'Surface';
-    let cost = ( asset.cost.amount ? asset.cost.amount  + 'x tier ' + asset.cost.tier : 'none' );
-    let gain = ( asset.gain.amount ? asset.gain.amount  + 'x tier ' + asset.gain.tier : 'none' );
+
+    let costImg =  ( asset.cost.amount ? 'img/t' + asset.cost.tier + '.png' : '' );
+    if (costImg) {
+        costImg = '<img class="tPointsImg" src="' + costImg + '">';
+    }
+    // let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>\x0a\x0ax\x0a\x0a' + costImg : 'none' );
+    let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>&nbsp;&nbsp;' + costImg : 'none' );
+
+    let gainImg = ( asset.gain.amount ? 'img/t' + asset.gain.tier + '.png' : '' );
+    if (gainImg) {
+        gainImg = '<img class="tPointsImg" src="' + gainImg + '">';
+    }
+    let gain = ( asset.gain.amount ? '<b>' + asset.gain.amount + '</b>&nbsp;&nbsp;' + gainImg : 'none' );
+
     let tonnage = 0;
     let surchargeFactor = 1;
     if (variant in assetTonnages) {
@@ -1823,8 +1856,8 @@ function assetInfo(asset, variant, posn) {
     html += '<tr class="inf"><td class="inf">landing pad: <b>' + padSize + '</b></td></tr>';
     html += '<tr class="inf"><td class="inf">effects: ' + effects + '</td></tr>';
     html += '<tr class="inf"><td class="inf">location: <b>' + location + '</b></td></tr>';
-    html += '<tr class="inf"><td class="inf">cost: <b>' + cost + '</b></td></tr>';
-    html += '<tr class="inf"><td class="inf">gain: <b>' + gain + '</b></td></tr>';
+    html += '<tr class="inf"><td class="inf">cost: ' + cost + '</td></tr>';
+    html += '<tr class="inf"><td class="inf">gain: ' + gain + '</td></tr>';
     html += '<tr class="inf"><td class="inf">hauling requirement (approx): <b>' + tonnage + '</b></td></tr>';
     html += '</table>';
     return html;
