@@ -999,9 +999,9 @@ const assetRequirements = {
     io: { req: ["demeter"], reqText: 'a space farm (agricultural installation)' },
     alala: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
     ares: { req: ["vacuna", "alastor"], reqText: 'a military installation' },
-    molae: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
-    tellus_i: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
-    eunostus: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost (installation)' },
+    molae: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost installation' },
+    tellus_i: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost installation' },
+    eunostus: { req: ["euthenia", "phorcys"], reqText: 'a mining outpost installation' },
     dicaeosyne: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
     poena: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
     eunomia: { req: ["enodia", "ichnaea"], reqText: 'a relay installation' },
@@ -1789,15 +1789,15 @@ function assetInfo(asset, variant, posn) {
     }
 
     if (pos.length) {
-        effects += '<font color="green">';
-        effects += pos.join(', ');
-        effects += '</font>\x0a';
+        effects += '<b><font color="green">';
+        effects += pos.join('\x0a');
+        effects += '</font></b>\x0a';
     }
 
     if (neg.length) {
-        effects += '<font color="#882828">'
-        effects += neg.join(', ');
-        effects += '</font>';
+        effects += '<b><font color="#882828">'
+        effects += neg.join('\x0a');
+        effects += '</font></b>';
     }
 
 
