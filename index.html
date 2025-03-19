@@ -187,11 +187,9 @@ table {
 .infoPanel{
   margin: 4% 4%;
   width: 100%;
-  background-color: #aaaacc;
+  background-color: #ddddff;
   color: #021224;
-/*  padding: 10px; */
-  border: 2px solid #021224; 
-  border: 2px solid #cccccc; 
+  border: 2px solid #ddddff; 
   border-radius: 3px;
 }
 
@@ -273,8 +271,7 @@ table {
 <div class="container">
   <div class="sidebar" id="sidebar">
     <div id="assetsContainerHeader">
-    <table class="nb"><tr class="nb"><td class="nb" width="30%"></td><td class="nb" width="40%">construction points:</td><td class="nb" width="30%" id="pointsContainer"></td></tr></table>
-    <!-- table class="nb"><tr class="nb"><td class="nb" id="pointsContainer" width="30%"></td><td class="nb" width="40%">colonised system</td><td class="nb" width="30%"></td></tr></table -->
+    <table class="nb"><tr class="nb"><td class="nb" id="pointsOptions" width="30%"><label for="hikeOption">pt costs rise?</label><input type="checkbox" id="hikeOption"></td><td class="nb" width="40%">construction points:</td><td class="nb" width="30%" id="pointsContainer"></td></tr></table>
     <hr/>
     <table class="nb"><tr class="nb"><td class="nb" id="undo" width="30%"></td><td class="nb" width="40%">Ports, Stations, etc.</td><td class="nb" id="redo" width="30%"></td></tr></table>
     </div>
@@ -299,6 +296,8 @@ table {
 </div>
 
 <script>
+
+let loggit = false;
 
 const headers = ["+", "asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy", "influence"];
 
@@ -1004,6 +1003,8 @@ let systemAssetsList = [];
 // next asset to be added at this index (assets already in this or higher indices are for "redo last")
 let assetsListCurrent = 0;
 let systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
+let doMechanise = true;
+let deMechanised = false;
 
 const assetRequirements = {
     aergia: { req: ["hermese", "angelia", "eirene"], reqText: 'a satellite installation' },
@@ -1061,6 +1062,18 @@ function idToVariant(id) {
     return parts[1];
 }
 
+function assetFromId(id) {
+
+    const variantName = idToVariant(id);
+
+    for(let assetName in assets) {
+        if (assets[assetName].variants.includes(variantName)) {
+            return assets[assetName];
+        }
+    }
+    return {};
+}
+
 function haveRequirementFor(id) {
     let variantName = idToVariant(id);
     if (variantName in assetRequirements) {
@@ -1071,6 +1084,24 @@ function haveRequirementFor(id) {
             }
         }
         return false;
+    }
+    return true;
+}
+
+function canAdd(asset) {
+    if (!numSystemAssets()) {
+        if (primaryTypes.includes(asset.type)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    if (asset.cost.amount > 0) {
+        costAmount = mechanise(asset);
+        let tier = 't' + asset.cost.tier;
+        if (points[tier] < costAmount) {
+            return false;
+        }
     }
     return true;
 }
@@ -1195,32 +1226,61 @@ function assetHeaders() {
     return r;
 }
 
-function canAdd(asset) {
-    if (!numSystemAssets()) {
-        if (primaryTypes.includes(asset.type)) {
-            return true;
-        } else {
-            return false;
+function countMajorAssets() {
+
+    if (assetsListCurrent === 0) {
+        return 0;
+    }
+
+    let total = 0;
+    let firstAss = assetFromId(systemAssetsList[0]);
+
+    if (firstAss.cost.amount > 0) { 
+        total -= 1;
+    }
+
+    for (let i = 0; i < assetsListCurrent; i++) {
+
+        const asset = assetFromId(systemAssetsList[i]);
+
+        if (asset.cost.amount >= 3) { 
+           total++;
         }
     }
-    if (asset.cost.amount > 0) {
-        let tier = 't' + asset.cost.tier;
-        if (points[tier] < asset.cost.amount) {
-            return false;
-        }
+
+    return total;
+}
+
+function mechanise(asset) {
+
+    if (!doMechanise || (asset.cost.amount < 3)) {
+        return asset.cost.amount;
     }
-    return true;
+
+    let numMajorAssets = countMajorAssets();
+
+    if (numMajorAssets < 2) {
+        return asset.cost.amount;
+    }
+
+    return asset.cost.amount + ((numMajorAssets - 1) * ((asset.cost.tier === 3) ? 6 : 2));
 }
 
 function actions(asset, variant) {
 
     let id = asset.name + '|' + variant;
-    var addCell;
+    let addCell;
 
     if (canAdd(asset)) {
         addCell = textElement('td', '[+]');
+
+        addCell = textElement('td', '[+]', 'mouseInOut', [
+            function() { this.style.background = '#ddddff'; this.style.color = '#021224'; infoBox(asset, variant); },
+            function() { this.style.background = '#208040'; this.style.color = '#68c0f0'; closeInfoPanel(); }
+        ]); 
         addCell.style.backgroundColor = '#208040';
         addCell.onclick = function() { addSystemAsset(asset, variant, true); };
+
     } else {
         addCell = textElement('td', '[_]');
         addCell.style.backgroundColor = '#808080';
@@ -1228,6 +1288,7 @@ function actions(asset, variant) {
 
     return addCell;
 }
+
 
 function assetRow(assetName, variant) {
 
@@ -1237,7 +1298,7 @@ function assetRow(assetName, variant) {
 
     let name = asset.type + ': ' + asset.name + ' (' + variant + ')';
     let assCell = textElement('td', name, 'mouseInOut', [
-            function() { this.style.background = '#ffffff'; this.style.color = '#021224'; infoBox(asset, variant); },
+            function() { this.style.background = '#ddddff'; this.style.color = '#021224'; infoBox(asset, variant); },
             function() { this.style.background = '#021224'; this.style.color = '#68c0f0'; closeInfoPanel(); }
     ]); 
 
@@ -1249,7 +1310,8 @@ function assetRow(assetName, variant) {
 
     let costStr = '-';
     if (asset.cost.amount > 0) {
-        costStr = asset.cost.amount + '&nbsp;' + (asset.cost.tier == 2 ? t2Img : t3Img);
+        let costAmount = mechanise(asset);
+        costStr = costAmount + '&nbsp;' + (asset.cost.tier == 2 ? t2Img : t3Img);
     }
     let gainStr = '-';
     if (asset.gain.amount > 0) {
@@ -1278,6 +1340,7 @@ function isVisible(assetName) {
             return false;
         }
     }
+
     if (assetFilters["space"]) {
         if (!(spaceTypes.includes(asset.type))) {
             return false;
@@ -1330,7 +1393,29 @@ function assetTable() {
     document.getElementById("tableContainer").appendChild(t);
 }
 
+function toggleMechanise() {
+
+    if (deMechanised) {
+        return;
+    }
+
+    doMechanise = !doMechanise;
+
+    if (!doMechanise) {
+        let cb = document.getElementById('hikeOption');
+        cb.disabled = true;
+        deMechanised = true;
+    }
+
+    refresh();
+}
+
 function showPoints() {
+
+    let cb = document.getElementById('hikeOption');
+    cb.checked = doMechanise;
+    cb.onclick = toggleMechanise;
+
     let t = document.createElement('table');
     let r = document.createElement('tr');
     let c = htmlElement('td', '<img class="tPointsImgB" src="img/t2.png"> <b>' + points.t2 + '</b>');
@@ -1489,6 +1574,18 @@ function showEconomy() {
     c.appendChild(t);
 }
 
+function mechanWarning() {
+    const p = document.createElement('p');
+    p.innerHTML = "There's optional support for the controversial "
+                + '<a href="https://forums.frontier.co.uk/threads/elite-dangerous-system-colonisation-beta-details-feedback.634055/post-10572014" target="_blank" style="color: #ff6644">'
+                + 'construction points price hike mechanic</a>, which you can turn off (once) with the checkbox (top left)<br />'
+                + 'Exporting and importing with different settings for this can create an inconsistent state - so '
+                + '<a href="http://catb.org/jargon/html/D/Don-t-do-that-then-.html" style="color: #ff6644">Don\'t Do That!</a>';
+    p.style.color = '#ff4444';
+    return p;
+}
+
+
 function buildWarning() {
     const p = document.createElement('p');
     p.innerHTML = '***WARNING***</div> '
@@ -1510,9 +1607,10 @@ function spreadsheetLink() {
 function intro() {
     const s = document.createElement('span');
     s.appendChild(textElement('p', 'Click a green "[+]" on the right to add an asset.'));
-    s.appendChild(textElement('p', 'Click filters like "[tier 3]" to show matching assets.'));
+    s.appendChild(textElement('p', 'Click filters like "[tier 3]" or "SOL" (standard of living) to show matching assets.'));
     s.appendChild(textElement('p', 'Buildable filter ("can build") is pre-enabled, click to disable.'));
     s.appendChild(textElement('p', 'Adding assets may require construction points (tier 2 or tier 3). No points are required for the first station.'));
+    s.appendChild(mechanWarning());
     s.appendChild(textElement('p', 'When you add an asset, this text will disappear and assets will appear here.'));
     s.appendChild(buildWarning());
     s.appendChild(spreadsheetLink());
@@ -1736,6 +1834,9 @@ function showAssets() {
 
 function toggleFilter(filter) {
 
+    console.log("  >>>>>>>>>>>>>>>>>>>>>>>>>>>> toggle filter: " + filter + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+    // loggit = true;
+
     assetFilters[filter] = assetFilters[filter] ? false : true;
 
     if (assetFilters[filter]) {
@@ -1782,18 +1883,6 @@ function showFilters() {
     filtersContainer.appendChild(t);
 }
 
-function assetFromId(id) {
-
-    const variantName = idToVariant(id);
-
-    for(assetName in assets) {
-        if (assets[assetName].variants.includes(variantName)) {
-            return assets[assetName];
-        }
-    }
-    return {};
-}
-
 function assetInfo(asset, variant, posn) {
 
     let padSize = (variant in padSizes ? padSizes[variant] : 'none');
@@ -1806,8 +1895,8 @@ function assetInfo(asset, variant, posn) {
     if (costImg) {
         costImg = '<img class="tPointsImgB" src="' + costImg + '">';
     }
-    // let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>\x0a\x0ax\x0a\x0a' + costImg : 'none' );
-    let cost = ( asset.cost.amount ? '<b>' + asset.cost.amount + '</b>&nbsp;&nbsp;' + costImg : 'none' );
+
+    let cost = ( asset.cost.amount ? '<b>' + mechanise(asset) + '</b>&nbsp;&nbsp;' + costImg : 'none' );
 
     let gainImg = ( asset.gain.amount ? 'img/t' + asset.gain.tier + '.png' : '' );
     if (gainImg) {
@@ -1886,7 +1975,7 @@ function infoBox(asset, variant, pos) {
     let exporter = document.getElementById("exportDialog");
     exporter.style.display = "none";
 
-    infoPanel.innerHTML = assetInfo(asset, variant, pos); // '<p>info for ' + variant + '</p>';
+    infoPanel.innerHTML = assetInfo(asset, variant, pos);
 
     infoPanel.style.display = "inline-block";
     wrapper.style.display = "inline-block";
@@ -1977,10 +2066,16 @@ function reset() {
     assetsListCurrent = 0;
     systemStatus = { pop: 0, mpop: 0, sec: 0, wealth: 0, tech: 0, sol: 0, dev: 0 };
 
+    let cb = document.getElementById('hikeOption');
+    cb.disabled = false;
+    doMechanise = true;
+    deMechanised = false;
+
     for (var filter in assetFilters) {
       assetFilters[filter] = false;
     }
     assetFilters["can build"] = true;
+
     refresh();
 }
 
@@ -1994,8 +2089,12 @@ function importFromFile() {
         idList.forEach( function(id) {
             let variant = idToVariant(id);
             let asset = assetFromId(id);
-            if  (variant) {
-                addSystemAsset(asset, variant, false);
+            if (canAdd(asset)) {
+                if  (variant) {
+                    addSystemAsset(asset, variant, false);
+                }
+            } else {
+                alert("can't add asset for " + id + ", maybe try without the points hike option?");
             }
         });
         refresh();
@@ -2036,6 +2135,7 @@ function refreshContainer(containerName, showFn) {
 }
 
 function refresh() {
+
     const containers = {
         'assetsContainer': showAssets,
         'statusContainer': showStatus,
@@ -2048,6 +2148,8 @@ function refresh() {
     for (var c in containers) {
         refreshContainer(c, containers[c]);
     }
+
+
 //    let d = document.getElementById("debug");
 //    d.innerHTML = '';
 }
