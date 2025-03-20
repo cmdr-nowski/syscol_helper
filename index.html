@@ -262,6 +262,7 @@ table {
           <label for="filename">file to save:</label>
           <input type="text" id="filename" name="fileneame">
           <input type="submit" value="export" id="exportBtn">
+          <p id="buildUrl"></p></div>
         </div>
       </div>
     </div>
@@ -297,12 +298,11 @@ table {
 
 <script>
 
-let loggit = false;
-
 const headers = ["+", "asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy", "influence"];
 
 const assets = {
    "Starport coriolis": {
+      n: 0,
       name: "coriolis",
       type: "Starport",
       variants: ["no_truss","dual_truss","quad_truss"],
@@ -312,6 +312,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Starport asteroid": {
+      n: 3,
       name: "asteroid",
       type: "Starport",
       variants: ["rock","ice"],
@@ -321,6 +322,7 @@ const assets = {
       economy: { initial: "extraction", influence: "-"}
    },
    "Starport ocellus": {
+      n: 5,
       name: "ocellus",
       type: "Starport",
       variants: ["ocellus"],
@@ -330,6 +332,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Starport orbis": {
+      n: 6,
       name: "orbis",
       type: "Starport",
       variants: ["apollo","artemis"],
@@ -339,6 +342,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Outpost commercial": {
+      n: 8,
       name: "commercial",
       type: "Outpost",
       variants: ["plutus"],
@@ -348,6 +352,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Outpost industrial": {
+      n: 9,
       name: "industrial",
       type: "Outpost",
       variants: ["vulcan"],
@@ -357,6 +362,7 @@ const assets = {
       economy: { initial: "industrial", influence: "-"}
    },
    "Outpost pirate": {
+      n: 10,
       name: "pirate",
       type: "Outpost",
       variants: ["dysnomia"],
@@ -366,6 +372,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Outpost civilian": {
+      n: 11,
       name: "civilian",
       type: "Outpost",
       variants: ["vesta"],
@@ -375,6 +382,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Outpost scientific": {
+      n: 12,
       name: "scientific",
       type: "Outpost",
       variants: ["prometheus"],
@@ -384,6 +392,7 @@ const assets = {
       economy: { initial: "hightech", influence: "-"}
    },
    "Outpost military": {
+      n: 13,
       name: "military",
       type: "Outpost",
       variants: ["nemesis"],
@@ -393,6 +402,7 @@ const assets = {
       economy: { initial: "military", influence: "-"}
    },
    "Installation Satellite": {
+      n: 14,
       name: "Satellite",
       type: "Installation",
       variants: ["hermese","angelia","eirene"],
@@ -402,6 +412,7 @@ const assets = {
       economy: { initial: "-", influence: "-"}
    },
    "Installation Communication": {
+      n: 17,
       name: "Communication",
       type: "Installation",
       variants: ["pistis","soter","aletheia"],
@@ -411,6 +422,7 @@ const assets = {
       economy: { initial: "-", influence: "-"}
    },
    "Installation Agricultural": {
+      n: 20,
       name: "Agricultural",
       type: "Installation",
       variants: ["demeter"],
@@ -420,6 +432,7 @@ const assets = {
       economy: { initial: "-", influence: "agricultural"}
    },
    "Installation Pirate Base": {
+      n: 21,
       name: "Pirate Base",
       type: "Installation",
       variants: ["apate","laverna"],
@@ -429,6 +442,7 @@ const assets = {
       economy: { initial: "-", influence: "contraband"}
    },
    "Installation Mining/Industrial": {
+      n: 23,
       name: "Mining/Industrial",
       type: "Installation",
       variants: ["euthenia","phorcys"],
@@ -438,6 +452,7 @@ const assets = {
       economy: { initial: "-", influence: "extraction"}
    },
    "Installation Relay": {
+      n: 25,
       name: "Relay",
       type: "Installation",
       variants: ["enodia","ichnaea"],
@@ -447,6 +462,7 @@ const assets = {
       economy: { initial: "-", influence: "hightech"}
    },
    "Installation Military": {
+      n: 27,
       name: "Military",
       type: "Installation",
       variants: ["vacuna","alastor"],
@@ -456,6 +472,7 @@ const assets = {
       economy: { initial: "-", influence: "military"}
    },
    "Installation Security": {
+      n: 29,
       name: "Security",
       type: "Installation",
       variants: ["dicaeosyne","poena","eunomia","nomos"],
@@ -465,6 +482,7 @@ const assets = {
       economy: { initial: "-", influence: "military"}
    },
    "Installation Government": {
+      n: 33,
       name: "Government",
       type: "Installation",
       variants: ["harmonia"],
@@ -474,6 +492,7 @@ const assets = {
       economy: { initial: "-", influence: "-"}
    },
    "Installation Medical": {
+      n: 34,
       name: "Medical",
       type: "Installation",
       variants: ["asclepius","eupraxia"],
@@ -483,6 +502,7 @@ const assets = {
       economy: { initial: "-", influence: "hightech"}
    },
    "Installation Research": {
+      n: 36,
       name: "Research",
       type: "Installation",
       variants: ["astraeus","coeus","dodona","dione"],
@@ -492,6 +512,7 @@ const assets = {
       economy: { initial: "-", influence: "hightech"}
    },
    "Installation Tourist": {
+      n: 40,
       name: "Tourist",
       type: "Installation",
       variants: ["hedone","opora","pasithea"],
@@ -501,6 +522,7 @@ const assets = {
       economy: { initial: "-", influence: "tourism"}
    },
    "Installation Bar": {
+      n: 43,
       name: "Bar",
       type: "Installation",
       variants: ["dionysus","bachus"],
@@ -510,6 +532,7 @@ const assets = {
       economy: { initial: "-", influence: "tourism"}
    },
    "Outpost Port Civilian": {
+      n: 45,
       name: "Civilian",
       type: "Outpost Port",
       variants: ["hestia","decima","atropos","nona","lachesis","clotho"],
@@ -519,6 +542,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Outpost Port Industrial": {
+      n: 51,
       name: "Industrial",
       type: "Outpost Port",
       variants: ["hephaestus","opis","ponos","tethys","bia","mefitis"],
@@ -528,6 +552,7 @@ const assets = {
       economy: { initial: "industrial", influence: "-"}
    },
    "Outpost Port Scientific": {
+      n: 57,
       name: "Scientific",
       type: "Outpost Port",
       variants: ["necessitas","ananke","fauna","providentia","antevorta","porrima"],
@@ -537,6 +562,7 @@ const assets = {
       economy: { initial: "hightech", influence: "-"}
    },
    "Port Large": {
+      n: 63,
       name: "Large",
       type: "Port",
       variants: ["zeus","hera","poseidon","aphrodite"],
@@ -546,6 +572,7 @@ const assets = {
       economy: { initial: "colony", influence: "-"}
    },
    "Settlement Small Agriculture": {
+      n: 67,
       name: "Small Agriculture",
       type: "Settlement",
       variants: ["consus"],
@@ -555,6 +582,7 @@ const assets = {
       economy: { initial: "agriculture", influence: "-"}
    },
    "Settlement Medium Agriculture": {
+      n: 68,
       name: "Medium Agriculture",
       type: "Settlement",
       variants: ["picumnus","annona"],
@@ -564,6 +592,7 @@ const assets = {
       economy: { initial: "agriculture", influence: "-"}
    },
    "Settlement Large Agriculture": {
+      n: 70,
       name: "Large Agriculture",
       type: "Settlement",
       variants: ["ceres","fornax"],
@@ -573,6 +602,7 @@ const assets = {
       economy: { initial: "agriculture", influence: "-"}
    },
    "Settlement Small Mining": {
+      n: 72,
       name: "Small Mining",
       type: "Settlement",
       variants: ["ourea"],
@@ -582,6 +612,7 @@ const assets = {
       economy: { initial: "extraction", influence: "-"}
    },
    "Settlement Medium Mining": {
+      n: 73,
       name: "Medium Mining",
       type: "Settlement",
       variants: ["mantus","orcus"],
@@ -591,6 +622,7 @@ const assets = {
       economy: { initial: "extraction", influence: "-"}
    },
    "Settlement Large Mining": {
+      n: 75,
       name: "Large Mining",
       type: "Settlement",
       variants: ["erebus","aerecura"],
@@ -600,6 +632,7 @@ const assets = {
       economy: { initial: "extraction", influence: "-"}
    },
    "Settlement Small Industrial": {
+      n: 77,
       name: "Small Industrial",
       type: "Settlement",
       variants: ["fontus"],
@@ -609,6 +642,7 @@ const assets = {
       economy: { initial: "industrial", influence: "-"}
    },
    "Settlement Medium Industrial": {
+      n: 78,
       name: "Medium Industrial",
       type: "Settlement",
       variants: ["metope","palici","minthe"],
@@ -618,6 +652,7 @@ const assets = {
       economy: { initial: "industrial", influence: "-"}
    },
    "Settlement Large Industrial": {
+      n: 81,
       name: "Large Industrial",
       type: "Settlement",
       variants: ["gaea"],
@@ -627,6 +662,7 @@ const assets = {
       economy: { initial: "industrial", influence: "-"}
    },
    "Settlement Small Military": {
+      n: 82,
       name: "Small Military",
       type: "Settlement",
       variants: ["ioke"],
@@ -636,6 +672,7 @@ const assets = {
       economy: { initial: "military", influence: "-"}
    },
    "Settlement Medium Military": {
+      n: 83,
       name: "Medium Military",
       type: "Settlement",
       variants: ["bellona","enyo","polemos"],
@@ -645,6 +682,7 @@ const assets = {
       economy: { initial: "military", influence: "-"}
    },
    "Settlement Large Military": {
+      n: 86,
       name: "Large Military",
       type: "Settlement",
       variants: ["minerva"],
@@ -654,6 +692,7 @@ const assets = {
       economy: { initial: "military", influence: "-"}
    },
    "Settlement Small Bio": {
+      n: 87,
       name: "Small Bio",
       type: "Settlement",
       variants: ["pheobe"],
@@ -663,6 +702,7 @@ const assets = {
       economy: { initial: "hightech", influence: "-"}
    },
    "Settlement Medium Bio": {
+      n: 88,
       name: "Medium Bio",
       type: "Settlement",
       variants: ["asteria","caerus"],
@@ -672,6 +712,7 @@ const assets = {
       economy: { initial: "hightech", influence: "-"}
    },
    "Settlement Large Bio": {
+      n: 90,
       name: "Large Bio",
       type: "Settlement",
       variants: ["chronos"],
@@ -681,6 +722,7 @@ const assets = {
       economy: { initial: "hightech", influence: "-"}
    },
    "Settlement Small Tourist": {
+      n: 91,
       name: "Small Tourist",
       type: "Settlement",
       variants: ["aergia"],
@@ -690,6 +732,7 @@ const assets = {
       economy: { initial: "tourism", influence: "-"}
    },
    "Settlement Medium Tourist": {
+      n: 92,
       name: "Medium Tourist",
       type: "Settlement",
       variants: ["comus","gelos"],
@@ -699,6 +742,7 @@ const assets = {
       economy: { initial: "tourism", influence: "-"}
    },
    "Settlement Large Tourist": {
+      n: 94,
       name: "Large Tourist",
       type: "Settlement",
       variants: ["fufluns"],
@@ -708,6 +752,7 @@ const assets = {
       economy: { initial: "tourism", influence: "-"}
    },
    "Hub Extraction": {
+      n: 95,
       name: "Extraction",
       type: "Hub",
       variants: ["tartarus"],
@@ -717,6 +762,7 @@ const assets = {
       economy: { initial: "-", influence: "extraction"}
    },
    "Hub Civilian": {
+      n: 96,
       name: "Civilian",
       type: "Hub",
       variants: ["aegle"],
@@ -726,6 +772,7 @@ const assets = {
       economy: { initial: "-", influence: "-"}
    },
    "Hub Exploration": {
+      n: 97,
       name: "Exploration",
       type: "Hub",
       variants: ["tellus_e"],
@@ -735,6 +782,7 @@ const assets = {
       economy: { initial: "-", influence: "tourism"}
    },
    "Hub Outpost": {
+      n: 98,
       name: "Outpost",
       type: "Hub",
       variants: ["io"],
@@ -744,6 +792,7 @@ const assets = {
       economy: { initial: "-", influence: "-"}
    },
    "Hub Scientific": {
+      n: 99,
       name: "Scientific",
       type: "Hub",
       variants: ["athena","caelus"],
@@ -753,6 +802,7 @@ const assets = {
       economy: { initial: "-", influence: "hightech"}
    },
    "Hub Military": {
+      n: 101,
       name: "Military",
       type: "Hub",
       variants: ["alala","ares"],
@@ -762,6 +812,7 @@ const assets = {
       economy: { initial: "-", influence: "military"}
    },
    "Hub Refinery": {
+      n: 103,
       name: "Refinery",
       type: "Hub",
       variants: ["silenus"],
@@ -771,6 +822,7 @@ const assets = {
       economy: { initial: "-", influence: "refinery"}
    },
    "Hub High Tech": {
+      n: 104,
       name: "High Tech",
       type: "Hub",
       variants: ["janus"],
@@ -780,6 +832,7 @@ const assets = {
       economy: { initial: "-", influence: "hightech"}
    },
    "Hub Industrial": {
+      n: 105,
       name: "Industrial",
       type: "Hub",
       variants: ["molae","tellus_i","eunostus"],
@@ -789,6 +842,7 @@ const assets = {
       economy: { initial: "-", influence: "industrial"}
    }
 };
+
 
 const padSizes = {
     aerecura : 'Large',
@@ -965,6 +1019,8 @@ const assetTonnages = {
     eunostus: 9919,
 };
 
+let idsByUid = [];
+
 const constructionFilters = [ 'can build', 'space', 'ground', 'tier 1', 'tier 2', 'tier 3'];
 
 let assetFilters = {
@@ -1062,6 +1118,10 @@ function idToVariant(id) {
     return parts[1];
 }
 
+function assetId(asset, variant) {
+    return asset.type + ' ' + asset.name + '|' + variant; 
+}
+
 function assetFromId(id) {
 
     const variantName = idToVariant(id);
@@ -1108,7 +1168,8 @@ function canAdd(asset) {
 
 function addSystemAsset(asset, variant, doRefresh) {
 
-    let id = asset.type + ' ' + asset.name + '|' + variant; 
+
+    let id = assetId(asset, variant); 
 
     if (!haveRequirementFor(id)) {
         let variantName = idToVariant(id);
@@ -1268,7 +1329,7 @@ function mechanise(asset) {
 
 function actions(asset, variant) {
 
-    let id = asset.name + '|' + variant;
+    let id = assetId(asset, variant); 
     let addCell;
 
     if (canAdd(asset)) {
@@ -1834,9 +1895,6 @@ function showAssets() {
 
 function toggleFilter(filter) {
 
-    console.log("  >>>>>>>>>>>>>>>>>>>>>>>>>>>> toggle filter: " + filter + " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-    // loggit = true;
-
     assetFilters[filter] = assetFilters[filter] ? false : true;
 
     if (assetFilters[filter]) {
@@ -1968,6 +2026,21 @@ function closeInfoPanel() {
     modal.style.display = "none";
 }
 
+function makeUrl(assetList) {
+    let idStr = '';
+    for (let id of assetList) {
+        let asset = assetFromId(id);
+        idStr += String.fromCharCode(asset['n']);
+    }
+
+    const encoder = new TextEncoder();
+    const u8idStr = encoder.encode(idStr);
+
+    let loc = window.location;
+    let url = loc.protocol + '//' + loc.host + loc.pathname + '#' + btoa(idStr); 
+    return url;
+}
+
 function infoBox(asset, variant, pos) {
 
     let wrapper = document.getElementById("infoContainer");
@@ -1981,8 +2054,8 @@ function infoBox(asset, variant, pos) {
     wrapper.style.display = "inline-block";
 }
 
-
 function exportDialog() {
+
     let modal = document.getElementById("modalContainer");
     let wrapper = document.getElementById("dialogContainer");
     let exporter = document.getElementById("exportDialog");
@@ -2010,6 +2083,11 @@ function exportDialog() {
 
     let exportList = systemAssetsList.slice(0, assetsListCurrent);
     let exportData = exportList.join("\n");
+    let buildUrl = makeUrl(exportList);
+    url = document.getElementById("buildUrl");
+
+    url.innerHTML = 'or use:<br /><a href="' + buildUrl + '" target="_blank" style="color: #ff6644">' + buildUrl + '</a>';
+
     txt.value = exportData;
 
     const filenameInput = document.getElementById('filename');
@@ -2079,6 +2157,20 @@ function reset() {
     refresh();
 }
 
+function importIdList(idList) {
+    idList.forEach( function(id) {
+        let variant = idToVariant(id);
+        let asset = assetFromId(id);
+        if (canAdd(asset)) {
+            if  (variant) {
+                addSystemAsset(asset, variant, false);
+            }
+        } else {
+            alert("can't add asset for " + id + ", maybe try without the points hike option?");
+        }
+    });
+}
+
 function importFromFile() {
     const fileList = this.files;
     const theFile = fileList[0];
@@ -2106,6 +2198,40 @@ function importFromFile() {
     reader.readAsText(theFile);
 }
 
+function buildIdsByUid() {
+    //shouldn't be calling more than once, but..
+    if (idsByUid.length > 0) {
+        return;
+    }
+    for (let name in assets) {
+        let uid = assets[name].n;
+        for (let variant of assets[name].variants) {
+            idsByUid[uid] = assetId(assets[name], variant);
+            uid++;
+        }
+    }
+}
+
+function importFromUrl() {
+
+    buildIdsByUid()
+
+    let loc = window.location;
+    let importStr = loc.hash;
+    if (!importStr) {
+        return undefined;
+    }
+
+    let idList = [];
+    idStr = atob(importStr.substring(1));
+    for (let i = 0; i < idStr.length; i++) {
+        idList.push(idsByUid[idStr.charCodeAt(i)]);
+    }
+
+    importIdList(idList);
+    refresh();
+}
+
 function init() {
     assetFilters["can build"] = true;
     showAssets();
@@ -2126,6 +2252,8 @@ function init() {
 
     const importInput = document.getElementById('importinput');
     importInput.addEventListener("change", importFromFile, false);
+
+    importFromUrl();
 }
 
 function refreshContainer(containerName, showFn) {
