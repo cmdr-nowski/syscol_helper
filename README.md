@@ -5,6 +5,7 @@
 Tool to experiment with system colony builds for Elite Dangerous
 
 - Try it at https://cmdr-nowski.github.io/syscol_helper/
+- Url encoding for system plans, e.g. https://cmdr-nowski.github.io/syscol_helper/#DFpISw5eBg== 
 - Models the dependencies and construction points requirements
 - Keeps track of system status effects, basic economy facts
 - Click green '+' signs to add facilities 
