@@ -262,7 +262,7 @@ table {
           <label for="filename">file to save:</label>
           <input type="text" id="filename" name="fileneame">
           <input type="submit" value="export" id="exportBtn">
-          <p id="buildUrl"></p></div>
+          <div><p id="buildUrl"></p><p id="urlCopy">(copy)</p></div>
         </div>
       </div>
     </div>
@@ -1274,8 +1274,8 @@ function effectCell(asset, str) {
 }
 
 function assetHeaders() {
+
     let r = document.createElement('tr');
-    r.onmouseover = function() { closeInfoPanel(); };
     headers.forEach( function (str)  {
         
         if (str in systemStatus) {
@@ -1341,6 +1341,7 @@ function actions(asset, variant) {
         ]); 
         addCell.style.backgroundColor = '#208040';
         addCell.onclick = function() { addSystemAsset(asset, variant, true); };
+        addCell.style.cursor = 'pointer';
 
     } else {
         addCell = textElement('td', '[_]');
@@ -1810,6 +1811,7 @@ function showAssets() {
         }
         redo.style.color = 'orange';
         redo.onclick = redoLastAsset;
+        redo.style.cursor = 'pointer';
     } else {
         if (redo.firstChild) {
             redo.removeChild(redo.firstChild);
@@ -1841,6 +1843,7 @@ function showAssets() {
     }
     undo.style.color = 'orange';
     undo.onclick = removeLastAsset;
+    undo.style.cursor = 'pointer';
         
     let tbl = document.createElement('table');
     tbl.style.marginBottom = 'auto';
@@ -1923,6 +1926,7 @@ function filterElement(elt, filter) {
         f.style.color = 'aqua';
     }
     f.onclick = function() { toggleFilter(filter); };
+    f.style.cursor = 'pointer';
     return f;
 }
 
@@ -2064,6 +2068,7 @@ function exportDialog() {
     closeBtn.onclick = function() {
         modal.style.display = "none";
     }
+    closeBtn.style.cursor = 'pointer';
 
     window.onclick = function(event) {
         if (event.target == modal || event.target == wrapper) {
@@ -2083,10 +2088,17 @@ function exportDialog() {
 
     let exportList = systemAssetsList.slice(0, assetsListCurrent);
     let exportData = exportList.join("\n");
-    let buildUrl = makeUrl(exportList);
-    url = document.getElementById("buildUrl");
 
-    url.innerHTML = 'or use:<br /><a href="' + buildUrl + '" target="_blank" style="color: #ff6644">' + buildUrl + '</a>';
+    let buildUrl = makeUrl(exportList);
+    let urlElt = document.getElementById("buildUrl");
+    urlElt.innerHTML = 'or use:<br /><a href="' + buildUrl + '" target="_blank" style="color: #ff6644">' + buildUrl + '</a>';
+    let urlCopy = document.getElementById('urlCopy');
+    urlCopy.innerHTML = '(copy)';
+    urlCopy.onclick = () => {
+        navigator.clipboard.writeText(buildUrl);
+        urlCopy.innerHTML = '(copied)';
+    }
+    urlCopy.style.cursor = 'pointer';
 
     txt.value = exportData;
 
@@ -2095,6 +2107,7 @@ function exportDialog() {
 
     exportBtn = document.getElementById('exportBtn');
     exportBtn.onclick = download;
+    exportBtn.style.cursor = 'pointer';
 
     infoPanel.style.display = "none";
     exporter.style.display = "inline-block";
@@ -2243,12 +2256,15 @@ function init() {
 
     const exportElt = document.getElementById('export');
     exportElt.onclick = function() { exportDialog(); };
+    exportElt.style.cursor = 'pointer';
 
     const importElt = document.getElementById('import');
     importElt.onclick = function() { importData(); };
+    importElt.style.cursor = 'pointer';
 
     const resetElt = document.getElementById('reset');
     resetElt.onclick = function() { reset(); };
+    resetElt.style.cursor = 'pointer';
 
     const importInput = document.getElementById('importinput');
     importInput.addEventListener("change", importFromFile, false);
