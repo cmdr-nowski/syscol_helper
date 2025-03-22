@@ -1585,19 +1585,26 @@ function showStatus() {
 
     let first = headers.indexOf('pop');
     let last = headers.indexOf('dev');
-    let limit = last - first + 1;
+    let limit = (last - first) + 2;
+
 
     let r = document.createElement('tr');
-    for (i = 0; i < limit; i++) {
-        let idx = i + first;
-        let statName = textElement('td', statNames[headers[idx]]);
+    for (i = first; i < last + 1; i++) {
+        let statName = textElement('td', statNames[headers[i]]);
         statName.className = 'statname';
+        if (i === last) {
+            statName.colSpan=2;
+        }
         r.appendChild(statName);
-        let stat = textElement('td', systemStatus[headers[idx]]);
+        let stat = textElement('td', systemStatus[headers[i]]);
         stat.className = 'stat';
-        stat.style.backgroundColor = statColour(systemStatus[headers[idx]]);
+        stat.style.backgroundColor = statColour(systemStatus[headers[i]]);
+        if (i === last) {
+            stat.colSpan=2;
+        }
         r.appendChild(stat);
-        if (i > 0 && (i % 2)) {
+
+        if ((i === last) || ((i - first) % 2)) {
             t.appendChild(r);
             r = document.createElement('tr');
         }
