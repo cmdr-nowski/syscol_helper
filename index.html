@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html><head>
 <!--
 https://github.com/cmdr-nowski/syscol_helper
@@ -1168,7 +1169,6 @@ function canAdd(asset) {
 
 function addSystemAsset(asset, variant, doRefresh) {
 
-
     let id = assetId(asset, variant); 
 
     if (!haveRequirementFor(id)) {
@@ -1194,6 +1194,7 @@ function addSystemAsset(asset, variant, doRefresh) {
     }
 
     systemAssetsList[assetsListCurrent] = id;
+
     assetsListCurrent++;
     while (systemAssetsList.length < assetsListCurrent) {
         systemAssetsList.pop;
@@ -1327,6 +1328,12 @@ function mechanise(asset) {
     return asset.cost.amount + ((numMajorAssets - 1) * ((asset.cost.tier === 3) ? 6 : 2));
 }
 
+function trimAssetsList() {
+    while (systemAssetsList.length && systemAssetsList.length > assetsListCurrent) {
+        let trimmed = systemAssetsList.pop();
+    }
+}
+
 function actions(asset, variant) {
 
     let id = assetId(asset, variant); 
@@ -1340,7 +1347,10 @@ function actions(asset, variant) {
             function() { this.style.background = '#208040'; this.style.color = '#68c0f0'; closeInfoPanel(); }
         ]); 
         addCell.style.backgroundColor = '#208040';
-        addCell.onclick = function() { addSystemAsset(asset, variant, true); };
+        addCell.onclick = function() { 
+            trimAssetsList();
+            addSystemAsset(asset, variant, true);
+        };
         addCell.style.cursor = 'pointer';
 
     } else {
@@ -1840,18 +1850,19 @@ function showAssets() {
         assetsContainer.style.height = 'auto';
         assetsContainer.style.flexDirection = 'column';
         return;
+    } else {
+
+        if (!undo.firstChild) {
+            undo.appendChild(document.createTextNode('remove last'));
+        }
+        undo.style.color = 'orange';
+        undo.onclick = removeLastAsset;
+        undo.style.cursor = 'pointer';
     }
 
     assetsContainer.style.flexDirection = 'column-reverse';
     assetsContainer.style.height = '42vh';
-
-    if (!undo.firstChild) {
-        undo.appendChild(document.createTextNode('remove last'));
-    }
-    undo.style.color = 'orange';
-    undo.onclick = removeLastAsset;
-    undo.style.cursor = 'pointer';
-        
+       
     let tbl = document.createElement('table');
     tbl.style.marginBottom = 'auto';
     let first = true;
