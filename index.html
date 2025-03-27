@@ -299,6 +299,7 @@ table {
 
 <script>
 
+
 const headers = ["+", "asset", "type", "cost", "gain", "pop", "mpop", "sec", "wealth", "tech", "sol", "dev", "economy", "influence"];
 
 const assets = {
@@ -550,7 +551,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 1,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "industrial", influence: "-"}
+      economy: { initial: "industrial", influence: "industrial"}
    },
    "Sufrace Outpost Scientific": {
       n: 57,
@@ -560,7 +561,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 1,mpop: 0,sec: -1,wealth: 0,tech: 5,sol: 0,dev: 1 },
-      economy: { initial: "hightech", influence: "-"}
+      economy: { initial: "hightech", influence: "hightech"}
    },
    "Port Large": {
       n: 63,
@@ -580,7 +581,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 3,dev: 0 },
-      economy: { initial: "agriculture", influence: "-"}
+      economy: { initial: "agriculture", influence: "agriculture"}
    },
    "Settlement Medium Agriculture": {
       n: 68,
@@ -590,7 +591,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 6,dev: 0 },
-      economy: { initial: "agriculture", influence: "-"}
+      economy: { initial: "agriculture", influence: "agriculture"}
    },
    "Settlement Large Agriculture": {
       n: 70,
@@ -600,7 +601,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 10,dev: 0 },
-      economy: { initial: "agriculture", influence: "-"}
+      economy: { initial: "agriculture", influence: "agriculture"}
    },
    "Settlement Small Mining": {
       n: 72,
@@ -610,7 +611,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 2,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "extraction", influence: "-"}
+      economy: { initial: "extraction", influence: "extraction"}
    },
    "Settlement Medium Mining": {
       n: 73,
@@ -620,7 +621,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 5,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "extraction", influence: "-"}
+      economy: { initial: "extraction", influence: "extraction"}
    },
    "Settlement Large Mining": {
       n: 75,
@@ -630,7 +631,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 7,tech: 1,sol: -2,dev: 0 },
-      economy: { initial: "extraction", influence: "-"}
+      economy: { initial: "extraction", influence: "extraction"}
    },
    "Settlement Small Industrial": {
       n: 77,
@@ -640,7 +641,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 0,dev: 2 },
-      economy: { initial: "industrial", influence: "-"}
+      economy: { initial: "industrial", influence: "industrial"}
    },
    "Settlement Medium Industrial": {
       n: 78,
@@ -650,7 +651,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 0,sol: 0,dev: 5 },
-      economy: { initial: "industrial", influence: "-"}
+      economy: { initial: "industrial", influence: "industrial"}
    },
    "Settlement Large Industrial": {
       n: 81,
@@ -660,7 +661,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 2,tech: 0,sol: 0,dev: 8 },
-      economy: { initial: "industrial", influence: "-"}
+      economy: { initial: "industrial", influence: "industrial"}
    },
    "Settlement Small Military": {
       n: 82,
@@ -670,7 +671,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 2,wealth: 0,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "military", influence: "-"}
+      economy: { initial: "military", influence: "military"}
    },
    "Settlement Medium Military": {
       n: 83,
@@ -680,7 +681,7 @@ const assets = {
       cost: {tier: 0, amount: 0},
       gain: {tier: 2, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 4,wealth: 0,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "military", influence: "-"}
+      economy: { initial: "military", influence: "military"}
    },
    "Settlement Large Military": {
       n: 86,
@@ -690,7 +691,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: 6,wealth: 0,tech: 0,sol: 0,dev: 2 },
-      economy: { initial: "military", influence: "-"}
+      economy: { initial: "military", influence: "military"}
    },
    "Settlement Small Bio": {
       n: 87,
@@ -700,7 +701,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 3,sol: 0,dev: 1 },
-      economy: { initial: "hightech", influence: "-"}
+      economy: { initial: "hightech", influence: "hightech"}
    },
    "Settlement Medium Bio": {
       n: 88,
@@ -710,7 +711,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 1},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 6,sol: 0,dev: 1 },
-      economy: { initial: "hightech", influence: "-"}
+      economy: { initial: "hightech", influence: "hightech"}
    },
    "Settlement Large Bio": {
       n: 90,
@@ -720,7 +721,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: 0,wealth: 0,tech: 10,sol: 0,dev: 2 },
-      economy: { initial: "hightech", influence: "-"}
+      economy: { initial: "hightech", influence: "hightech"}
    },
    "Settlement Small Tourist": {
       n: 91,
@@ -730,7 +731,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 1},
       effect: { pop: 0,mpop: 0,sec: -1,wealth: 1,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "tourism", influence: "-"}
+      economy: { initial: "tourism", influence: "tourism"}
    },
    "Settlement Medium Tourist": {
       n: 92,
@@ -740,7 +741,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 1},
       effect: { pop: 0,mpop: 0,sec: -1,wealth: 2,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "tourism", influence: "-"}
+      economy: { initial: "tourism", influence: "tourism"}
    },
    "Settlement Large Tourist": {
       n: 94,
@@ -750,7 +751,7 @@ const assets = {
       cost: {tier: 2, amount: 1},
       gain: {tier: 3, amount: 2},
       effect: { pop: 0,mpop: 0,sec: -2,wealth: 5,tech: 0,sol: 0,dev: 0 },
-      economy: { initial: "tourism", influence: "-"}
+      economy: { initial: "tourism", influence: "tourism"}
    },
    "Hub Extraction": {
       n: 95,
